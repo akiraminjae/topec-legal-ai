@@ -1,0 +1,29 @@
+.env
+.env.local
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+next-env.d.ts
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local data
+apps/api/.env
+apps/web/.env.local
+*.log
+
+# Claude Code local settings (may contain command history with embedded secrets)
+.claude/settings.local.json

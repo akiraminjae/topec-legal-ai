@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TOPEC Legal AI — AI 계약·법률 검토 지원 시스템</title>
+<meta name="description" content="TOPEC 사내 AI 법률검토 시스템 — 계약서 위험분석, 소송·분쟁 사건 통합분석, 듀얼 AI(Claude+Gemini) 교차검토, 사건 AI 질의응답까지.">
+<style>
+  :root{
+    --brand:#2563eb; --brand-dark:#1e40af; --brand-light:#dbeafe;
+    --ink:#0f172a; --slate:#475569; --muted:#94a3b8; --bg:#f8fafc; --card:#ffffff;
+    --green:#059669; --amber:#d97706; --red:#dc2626; --indigo:#4f46e5;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Pretendard','Malgun Gothic','Apple SD Gothic Neo',sans-serif;color:var(--ink);background:var(--bg);line-height:1.6}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+
+  header{position:sticky;top:0;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e2e8f0;z-index:10}
+  .nav{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;color:var(--brand-dark)}
+  .logo svg{color:var(--brand)}
+  .nav-links{display:flex;gap:22px;font-size:14px;color:var(--slate)}
+  .nav-links a:hover{color:var(--brand)}
+
+  .hero{background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#3b82f6 100%);color:#fff;padding:72px 0 64px;text-align:center}
+  .hero .robot{margin-bottom:18px}
+  .hero h1{font-size:clamp(28px,4.5vw,44px);font-weight:800;letter-spacing:-0.02em}
+  .hero p.sub{margin:14px auto 0;max-width:640px;font-size:clamp(15px,2vw,18px);color:#dbeafe}
+  .hero .badges{margin-top:26px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+  .hero .badges span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:6px 14px;font-size:13px}
+  .cta{margin-top:32px;display:inline-block;background:#fff;color:var(--brand-dark);font-weight:700;padding:13px 30px;border-radius:10px;font-size:15px;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+  .cta:hover{transform:translateY(-1px)}
+  .hero .note{margin-top:12px;font-size:12.5px;color:#bfdbfe}
+
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:-34px auto 0;position:relative}
+  .stat{background:var(--card);border:1px solid #e2e8f0;border-radius:14px;padding:18px;text-align:center;box-shadow:0 6px 18px rgba(15,23,42,.06)}
+  .stat b{display:block;font-size:22px;color:var(--brand)}
+  .stat span{font-size:12.5px;color:var(--slate)}
+
+  section{padding:64px 0}
+  h2{font-size:clamp(22px,3vw,30px);font-weight:800;text-align:center;letter-spacing:-0.02em}
+  .sec-sub{text-align:center;color:var(--slate);margin:10px auto 40px;max-width:620px;font-size:15px}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+  .card{background:var(--card);border:1px solid #e2e8f0;border-radius:14px;padding:24px;transition:box-shadow .2s,transform .2s}
+  .card:hover{box-shadow:0 10px 26px rgba(15,23,42,.09);transform:translateY(-2px)}
+  .card .ic{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px;background:var(--brand-light)}
+  .card h3{font-size:17px;margin-bottom:8px}
+  .card p{font-size:14px;color:var(--slate)}
+  .card ul{margin-top:10px;font-size:13.5px;color:var(--slate);padding-left:18px}
+  .card li{margin-bottom:4px}
+
+  .dual{background:linear-gradient(135deg,#eef2ff,#e0e7ff);border:1px solid #c7d2fe;border-radius:18px;padding:36px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:22px;align-items:center}
+  .dual .ai-box{background:#fff;border-radius:14px;padding:22px;border:1px solid #e2e8f0}
+  .dual .ai-box .tag{display:inline-block;border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700;margin-bottom:10px}
+  .dual .claude .tag{background:#fef3c7;color:#92400e}
+  .dual .gemini .tag{background:#dbeafe;color:#1e40af}
+  .dual .ai-box h4{font-size:16px;margin-bottom:6px}
+  .dual .ai-box p{font-size:13.5px;color:var(--slate)}
+  .dual .mid{text-align:center;font-size:34px}
+
+  .flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;counter-reset:step}
+  .flow .step{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px 16px;position:relative}
+  .flow .step::before{counter-increment:step;content:counter(step);position:absolute;top:-12px;left:16px;background:var(--brand);color:#fff;width:24px;height:24px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700}
+  .flow .step b{display:block;font-size:14px;margin:6px 0 4px}
+  .flow .step span{font-size:12.5px;color:var(--slate)}
+
+  .sec-security{background:#0f172a;color:#e2e8f0}
+  .sec-security h2{color:#fff}
+  .sec-security .sec-sub{color:#94a3b8}
+  .sec-security .card{background:#1e293b;border-color:#334155}
+  .sec-security .card h3{color:#f1f5f9}
+  .sec-security .card p,.sec-security .card ul{color:#94a3b8}
+  .sec-security .card .ic{background:#334155}
+
+  .access{background:var(--card);border:1px solid #e2e8f0;border-radius:18px;padding:34px;text-align:center}
+  .access .url{display:inline-block;background:var(--brand-light);color:var(--brand-dark);font-weight:700;padding:10px 22px;border-radius:10px;font-size:16px;margin:14px 0}
+  .access p{font-size:14px;color:var(--slate)}
+
+  footer{background:#0f172a;color:#94a3b8;padding:36px 0;font-size:13px}
+  footer .foot{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:center}
+  footer .disclaimer{margin-top:14px;padding-top:14px;border-top:1px solid #1e293b;font-size:12px;color:#64748b}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="logo" href="#">
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="30" height="30"><line x1="16" y1="10" x2="16" y2="6.5"/><circle cx="16" cy="4.8" r="1.9" fill="currentColor" stroke="none"/><rect x="6" y="10" width="20" height="15" rx="4.5"/><circle cx="12.5" cy="17.5" r="1.7" fill="currentColor" stroke="none"/><circle cx="19.5" cy="17.5" r="1.7" fill="currentColor" stroke="none"/><rect x="8" y="29" width="16" height="14" rx="3.5"/><circle cx="16" cy="36" r="1.6" fill="currentColor" stroke="none"/><line x1="12" y1="43" x2="12" y2="48"/><line x1="20" y1="43" x2="20" y2="48"/><path d="M24 32 L40 34"/><circle cx="44" cy="34" r="2.6" fill="currentColor" stroke="none"/><line x1="44" y1="14" x2="44" y2="46"/><circle cx="44" cy="11.5" r="2" fill="currentColor" stroke="none"/><line x1="37.5" y1="46" x2="50.5" y2="46"/><line x1="34" y1="17" x2="54" y2="17"/><path d="M34 17 L30.5 25.5 M34 17 L37.5 25.5" stroke-width="2"/><path d="M29.5 26 A4.6 4.6 0 0 0 38.5 26 Z" stroke-width="2"/><path d="M54 17 L50.5 25.5 M54 17 L57.5 25.5" stroke-width="2"/><path d="M49.5 26 A4.6 4.6 0 0 0 58.5 26 Z" stroke-width="2"/></svg>
+      TOPEC Legal AI
+    </a>
+    <nav class="nav-links">
+      <a href="#features">주요 기능</a>
+      <a href="#case">사건 통합분석</a>
+      <a href="#dual">듀얼 AI</a>
+      <a href="#security">보안</a>
+      <a href="#access">접속 안내</a>
+    </nav>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="wrap">
+    <div class="robot">
+      <svg viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="84" height="84"><line x1="16" y1="10" x2="16" y2="6.5"/><circle cx="16" cy="4.8" r="1.9" fill="#fff" stroke="none"/><rect x="6" y="10" width="20" height="15" rx="4.5"/><circle cx="12.5" cy="17.5" r="1.7" fill="#fff" stroke="none"/><circle cx="19.5" cy="17.5" r="1.7" fill="#fff" stroke="none"/><rect x="8" y="29" width="16" height="14" rx="3.5"/><circle cx="16" cy="36" r="1.6" fill="#fff" stroke="none"/><line x1="12" y1="43" x2="12" y2="48"/><line x1="20" y1="43" x2="20" y2="48"/><path d="M24 32 L40 34"/><circle cx="44" cy="34" r="2.6" fill="#fff" stroke="none"/><line x1="44" y1="14" x2="44" y2="46"/><circle cx="44" cy="11.5" r="2" fill="#fff" stroke="none"/><line x1="37.5" y1="46" x2="50.5" y2="46"/><line x1="34" y1="17" x2="54" y2="17"/><path d="M34 17 L30.5 25.5 M34 17 L37.5 25.5" stroke-width="2"/><path d="M29.5 26 A4.6 4.6 0 0 0 38.5 26 Z" stroke-width="2"/><path d="M54 17 L50.5 25.5 M54 17 L57.5 25.5" stroke-width="2"/><path d="M49.5 26 A4.6 4.6 0 0 0 58.5 26 Z" stroke-width="2"/></svg>
+    </div>
+    <h1>TOPEC Legal AI</h1>
+    <p class="sub">계약서 위험분석부터 소송·분쟁 사건 통합분석, 듀얼 AI 교차검토까지 —<br>TOPEC 임직원을 위한 사내 AI 법률검토 지원 시스템</p>
+    <div class="badges">
+      <span>🤖 Claude + Gemini 듀얼 AI</span>
+      <span>📄 계약서 AI 검토</span>
+      <span>⚖️ 소송·분쟁 사건관리</span>
+      <span>🔍 법령·판례 RAG 검색</span>
+      <span>🔒 보안등급별 AI 라우팅</span>
+    </div>
+    <a class="cta" href="#access">시스템 접속 안내 →</a>
+    <p class="note">내부 임직원 전용 시스템입니다. 사내 계정으로 로그인해야 이용할 수 있습니다.</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="stats">
+    <div class="stat"><b>2종</b><span>AI 엔진 (Claude·Gemini)</span></div>
+    <div class="stat"><b>6종</b><span>지원 파일 (PDF·DOCX·HWP·HWPX·이미지·TXT)</span></div>
+    <div class="stat"><b>50개</b><span>사건당 일괄 업로드 문서</span></div>
+    <div class="stat"><b>3단계</b><span>계약 수정안 (최소·표준·강화)</span></div>
+    <div class="stat"><b>0건</b><span>기밀문서 외부 AI 전송</span></div>
+  </div>
+</div>
+
+<section id="features">
+  <div class="wrap">
+    <h2>주요 기능</h2>
+    <p class="sec-sub">문서 업로드부터 분석·수정안·보고서·공유까지, 법률검토의 전 과정을 하나의 시스템에서 처리합니다.</p>
+    <div class="grid">
+      <div class="card">
+        <div class="ic">📄</div>
+        <h3>계약서 AI 위험분석</h3>
+        <p>계약서를 조항 단위로 분해하고 위험규칙 엔진과 AI가 이중으로 검토합니다.</p>
+        <ul>
+          <li>조항별 위험도 (HIGH/MEDIUM/LOW)</li>
+          <li>TOPEC 입장(원사업자/수급사업자) 반영</li>
+          <li>수정안 3단계 자동 제안</li>
+          <li>검토보고서 DOCX·PDF 생성</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="ic">⚖️</div>
+        <h3>소송·분쟁 문서 검토</h3>
+        <p>준비서면·소장·답변서 등의 상대방 주장을 쟁점별로 분석하고 대응방향을 제시합니다.</p>
+        <ul>
+          <li>주장·쟁점 자동 구분</li>
+          <li>쟁점별 리스크와 권고 대응</li>
+          <li>법령·판례 근거 인용</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="ic">📎</div>
+        <h3>다중 파일 통합 분석</h3>
+        <p>여러 첨부파일을 한 번에 올리면 전체 내용을 결합해 하나의 분석으로 통합합니다.</p>
+        <ul>
+          <li>첨부 전체를 AI가 함께 판독</li>
+          <li>파일별 분량 보장 (누락 없음)</li>
+          <li>손상 파일은 건너뛰고 계속 진행</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="ic">💬</div>
+        <h3>AI 질의응답 (RAG)</h3>
+        <p>문서·사건 자료에 근거해서만 답하는 질의응답. 근거 없는 답변은 만들지 않습니다.</p>
+        <ul>
+          <li>결론·근거·영향·권고 구조화 답변</li>
+          <li>사건 단위 자료 격리 검색</li>
+          <li>law.go.kr 법령 실시간 연동</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="ic">📊</div>
+        <h3>실시간 진행률·대시보드</h3>
+        <p>분석 진행 상황을 0~100% 게이지로 실시간 표시하고, 결과를 인포그래픽으로 보여줍니다.</p>
+        <ul>
+          <li>단계별 가중치 기반 진행률</li>
+          <li>위험도 분포·통계 차트</li>
+          <li>관리자 사용량 대시보드</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="ic">📤</div>
+        <h3>공유·보고서</h3>
+        <p>분석 결과를 다양한 형식으로 즉시 공유할 수 있습니다.</p>
+        <ul>
+          <li>텍스트 복사 / Word / PDF</li>
+          <li>카카오톡 공유</li>
+          <li>법무검토 워크플로우 연계</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="case" style="background:#eef2f7">
+  <div class="wrap">
+    <h2>소송·분쟁 사건 통합분석</h2>
+    <p class="sec-sub">사건 하나에 수십 건의 문서 — 전부 읽고, 시간순으로 정리하고, 모순까지 찾아냅니다.</p>
+    <div class="flow">
+      <div class="step"><b>일괄 업로드</b><span>최대 50개 PDF를 한 번에. 중복 파일 자동 감지</span></div>
+      <div class="step"><b>자동 분류</b><span>준비서면·결정문·통지서 등 문서유형 AI 분류</span></div>
+      <div class="step"><b>타임라인</b><span>문서 속 날짜를 추출해 사건 경과를 시간순 재구성</span></div>
+      <div class="step"><b>관계·모순 탐지</b><span>문서 간 응답·보강 관계와 진술 불일치 자동 탐지</span></div>
+      <div class="step"><b>통합분석</b><span>상대방 주장 변화, 핵심 쟁점, 누락사항, 대응방향 종합</span></div>
+      <div class="step"><b>대응문서 작성</b><span>사건 자료에 근거한 대응서면 초안 생성</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="dual">
+  <div class="wrap">
+    <h2>듀얼 AI 교차검토</h2>
+    <p class="sec-sub">하나의 AI를 믿지 않습니다. 서로 다른 두 AI가 같은 문서를 검토하고 서로의 결론을 검증합니다.</p>
+    <div class="dual">
+      <div class="ai-box claude">
+        <span class="tag">1차 분석 — Claude</span>
+        <h4>정밀 법률분석</h4>
+        <p>문서 전체를 판독해 쟁점 도출, 위험도 평가, 대응방향을 수립하는 주 분석 엔진.</p>
+      </div>
+      <div class="mid">⇄</div>
+      <div class="ai-box gemini">
+        <span class="tag">2차 교차검토 — Gemini</span>
+        <h4>독립 검증·보완</h4>
+        <p>1차 분석을 원문과 대조해 동의 수준을 판정하고, 놓친 리스크와 누락 논점을 별도로 지적.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="security" class="sec-security">
+  <div class="wrap">
+    <h2>보안 원칙</h2>
+    <p class="sec-sub">법률문서는 가장 민감한 사내 자산입니다. 시스템 전체가 보안등급을 기준으로 동작합니다.</p>
+    <div class="grid">
+      <div class="card">
+        <div class="ic">🔒</div>
+        <h3>보안등급별 AI 라우팅</h3>
+        <p>CONFIDENTIAL 문서는 외부 AI로 절대 전송되지 않습니다. 내부망 모델이 없으면 분석을 거부할지언정 몰래 외부로 보내지 않습니다.</p>
+      </div>
+      <div class="card">
+        <div class="ic">🕶️</div>
+        <h3>개인정보 마스킹</h3>
+        <p>주민번호·연락처 등 민감정보는 AI 호출 전에 자동 마스킹됩니다.</p>
+      </div>
+      <div class="card">
+        <div class="ic">📜</div>
+        <h3>전 과정 감사로그</h3>
+        <p>업로드·분석·다운로드·공유 등 모든 행위가 감사로그로 기록됩니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="access">
+  <div class="wrap">
+    <div class="access">
+      <h2>시스템 접속</h2>
+      <p style="margin-top:8px">TOPEC Legal AI는 내부 임직원 전용 시스템입니다.</p>
+      <div class="url">사내망 접속 → 시스템 URL은 소속 부서 관리자에게 문의</div>
+      <p>계정 문의·권한 신청: 법무팀 / IT 관리자<br>최초 로그인 시 비밀번호 변경이 필요합니다.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <span><b style="color:#e2e8f0">TOPEC Legal AI</b> — AI 계약·법률 검토 지원 시스템</span>
+      <span>© TOPEC. Internal use only.</span>
+    </div>
+    <p class="disclaimer">본 시스템의 AI 분석 결과는 법률검토를 지원하기 위한 참고자료이며, 법률 자문을 대체하지 않습니다. 중요한 의사결정은 반드시 법무담당자 및 변호사의 검토를 거치시기 바랍니다.</p>
+  </div>
+</footer>
+
+</body>
+</html>

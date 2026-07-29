@@ -1,0 +1,35 @@
+{
+  "description": "AI/규칙엔진 평가용 Golden Set. 각 샘플의 기대 위험탐지 규칙코드를 정의한다. scripts/run_golden_eval.py로 자동 채점한다.",
+  "samples": [
+    {
+      "file": "demo_subcontract_high_risk.txt",
+      "contract_type": "SUBCONTRACT",
+      "topec_position": "PRINCIPAL_CONTRACTOR",
+      "expected_rule_codes": [
+        "UNLIMITED_DAMAGES",
+        "NO_DELAY_PENALTY_CAP",
+        "UNILATERAL_TERMINATION",
+        "NO_ADDITIONAL_WORK_COMPENSATION",
+        "FULL_IP_ASSIGNMENT",
+        "COUNTERPARTY_JURISDICTION",
+        "NO_PRICE_ADJUSTMENT",
+        "NO_FORCE_MAJEURE"
+      ]
+    },
+    {
+      "file": "demo_nda_perpetual.txt",
+      "contract_type": "NDA",
+      "topec_position": "CONFIDENTIAL_INFO_PROVIDER",
+      "expected_rule_codes": [
+        "PERPETUAL_CONFIDENTIALITY",
+        "NO_FORCE_MAJEURE"
+      ]
+    },
+    {
+      "file": "demo_low_risk_standard.txt",
+      "contract_type": "GENERAL_SERVICE",
+      "topec_position": "CLIENT",
+      "expected_rule_codes": []
+    }
+  ]
+}
