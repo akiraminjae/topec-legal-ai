@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@/lib/api";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { api, extractErrorMessage } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
 import { DocumentOut } from "@/lib/types";
 import { RiskBadge, StatusBadge } from "@/components/Badges";
 import { CONTRACT_TYPE_LABELS, documentTypeLabel } from "@/lib/labels";
@@ -12,6 +13,10 @@ export default function DocumentsPage() {
   const [search, setSearch] = useState("");
   const [contractType, setContractType] = useState("");
   const [riskLevel, setRiskLevel] = useState("");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const { user, hasRole } = useAuth();
 
   const { data: documents = [], isLoading } = useQuery<DocumentOut[]>({
     queryKey: ["documents", search, contractType, riskLevel],
@@ -23,6 +28,20 @@ export default function DocumentsPage() {
       return (await api.get<DocumentOut[]>("/api/documents", { params })).data;
     },
   });
+
+  async function handleDelete(id: string) {
+    if (!confirm("이 문서를 삭제하시겠습니까? 삭제된 문서는 복구할 수 없습니다.")) return;
+    setError(null);
+    setDeletingId(id);
+    try {
+      await api.delete(`/api/documents/${id}`);
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
+    } catch (err) {
+      setError(extractErrorMessage(err));
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -66,6 +85,8 @@ export default function DocumentsPage() {
         </select>
       </div>
 
+      {error && <p className="text-sm text-red-600">{error}</p>}
+
       <div className="rounded border border-slate-200 bg-white">
         <table className="w-full text-sm">
           <thead>
@@ -77,27 +98,42 @@ export default function DocumentsPage() {
               <th>상태</th>
               <th>위험등급</th>
               <th>등록일</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
-            {documents.map((d) => (
-              <tr key={d.id} className="border-b border-slate-100 hover:bg-slate-50">
-                <td className="p-3">
-                  <Link href={`/documents/${d.id}`} className="text-brand-700 hover:underline">
-                    {d.title}
-                  </Link>
-                </td>
-                <td>{documentTypeLabel(d)}</td>
-                <td>{d.counterparty_name || "-"}</td>
-                <td>{d.department || "-"}</td>
-                <td><StatusBadge status={d.status} /></td>
-                <td><RiskBadge level={d.overall_risk_level} /></td>
-                <td className="text-slate-500">{new Date(d.created_at).toLocaleDateString("ko-KR")}</td>
-              </tr>
-            ))}
+            {documents.map((d) => {
+              const canManage = user?.id === d.owner_id || hasRole("SYSTEM_ADMIN");
+              return (
+                <tr key={d.id} className="border-b border-slate-100 hover:bg-slate-50">
+                  <td className="p-3">
+                    <Link href={`/documents/${d.id}`} className="text-brand-700 hover:underline">
+                      {d.title}
+                    </Link>
+                  </td>
+                  <td>{documentTypeLabel(d)}</td>
+                  <td>{d.counterparty_name || "-"}</td>
+                  <td>{d.department || "-"}</td>
+                  <td><StatusBadge status={d.status} /></td>
+                  <td><RiskBadge level={d.overall_risk_level} /></td>
+                  <td className="text-slate-500">{new Date(d.created_at).toLocaleDateString("ko-KR")}</td>
+                  <td>
+                    {canManage && (
+                      <button
+                        onClick={() => handleDelete(d.id)}
+                        disabled={deletingId === d.id}
+                        className="rounded border border-red-300 px-2 py-1 text-xs text-red-600 hover:bg-red-50 disabled:opacity-50"
+                      >
+                        삭제
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
             {!isLoading && documents.length === 0 && (
               <tr>
-                <td colSpan={7} className="py-6 text-center text-slate-400">
+                <td colSpan={8} className="py-6 text-center text-slate-400">
                   조건에 맞는 문서가 없습니다.
                 </td>
               </tr>

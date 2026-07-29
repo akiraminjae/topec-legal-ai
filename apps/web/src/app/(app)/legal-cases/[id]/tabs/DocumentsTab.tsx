@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, extractErrorMessage } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
 import { CaseDocumentOut } from "@/lib/types";
 import { StatusBadge, RiskBadge } from "@/components/Badges";
 import { LITIGATION_DOCUMENT_TYPE_LABELS } from "@/lib/labels";
@@ -11,7 +12,9 @@ import { LITIGATION_DOCUMENT_TYPE_LABELS } from "@/lib/labels";
 export function DocumentsTab({ caseId }: { caseId: string }) {
   const queryClient = useQueryClient();
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { user, hasRole } = useAuth();
 
   const { data: documents = [], isLoading } = useQuery<CaseDocumentOut[]>({
     queryKey: ["case-documents", caseId],
@@ -31,6 +34,20 @@ export function DocumentsTab({ caseId }: { caseId: string }) {
       setError(extractErrorMessage(err));
     } finally {
       setConfirmingId(null);
+    }
+  }
+
+  async function handleDelete(documentId: string) {
+    if (!confirm("이 문서를 삭제하시겠습니까? 삭제된 문서는 복구할 수 없습니다.")) return;
+    setError(null);
+    setDeletingId(documentId);
+    try {
+      await api.delete(`/api/documents/${documentId}`);
+      queryClient.invalidateQueries({ queryKey: ["case-documents", caseId] });
+    } catch (err) {
+      setError(extractErrorMessage(err));
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -57,6 +74,7 @@ export function DocumentsTab({ caseId }: { caseId: string }) {
               <th>상태</th>
               <th>위험등급</th>
               <th>업로드일</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -109,6 +127,17 @@ export function DocumentsTab({ caseId }: { caseId: string }) {
                   <RiskBadge level={d.overall_risk_level} />
                 </td>
                 <td className="text-slate-500">{new Date(d.created_at).toLocaleString("ko-KR")}</td>
+                <td>
+                  {(user?.id === d.owner_id || hasRole("SYSTEM_ADMIN")) && (
+                    <button
+                      onClick={() => handleDelete(d.document_id)}
+                      disabled={deletingId === d.document_id}
+                      className="rounded border border-red-300 px-2 py-1 text-xs text-red-600 hover:bg-red-50 disabled:opacity-50"
+                    >
+                      삭제
+                    </button>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>

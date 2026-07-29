@@ -111,8 +111,10 @@ class CaseDocumentOut(BaseModel):
     title: str
     litigation_document_type: str | None
     status: str
+    failure_reason: str | None = None
     overall_risk_level: str | None
     legal_review_required: bool
+    owner_id: uuid.UUID
     created_at: datetime
     # AI 추출 결과(§10/§12) — 비어있으면 아직 추출되지 않았거나 실패한 것
     ai_suggested_document_type: str | None = None

@@ -27,3 +27,13 @@ apps/web/.env.local
 
 # Claude Code local settings (may contain command history with embedded secrets)
 .claude/settings.local.json
+
+# Android TWA — signing key, machine-specific SDK path, and build outputs never belong in git
+mobile/android-twa/*.keystore
+mobile/android-twa/local.properties
+mobile/android-twa/.gradle/
+mobile/android-twa/build/
+mobile/android-twa/app/build/
+mobile/android-twa/*.apk
+mobile/android-twa/*.apk.idsig
+mobile/android-twa/*.aab

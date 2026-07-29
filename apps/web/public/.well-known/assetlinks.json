@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "kr.co.topecai.legalai",
+      "sha256_cert_fingerprints": [
+        "D3:37:27:A6:40:B7:36:66:4B:A8:17:F5:E9:91:61:E4:47:F4:01:B1:37:38:1F:1C:BC:B5:8E:65:92:DD:C7:21"
+      ]
+    }
+  }
+]

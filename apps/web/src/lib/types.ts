@@ -14,8 +14,10 @@ export interface DocumentOut {
   security_level: string;
   retention_policy: string;
   status: string;
+  failure_reason: string | null;
   overall_risk_level: string | null;
   legal_review_required: boolean;
+  owner_id: string;
   owner_name: string | null;
   created_at: string;
 }
@@ -199,8 +201,10 @@ export interface CaseDocumentOut {
   title: string;
   litigation_document_type: string | null;
   status: string;
+  failure_reason: string | null;
   overall_risk_level: string | null;
   legal_review_required: boolean;
+  owner_id: string;
   created_at: string;
   ai_suggested_document_type: string | null;
   classification_confidence: number | null;

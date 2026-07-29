@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@/lib/api";
+import { useParams, useRouter } from "next/navigation";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { api, extractErrorMessage } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
 import { DocumentOut, ProcessingStatusOut } from "@/lib/types";
 import {
   CONTRACT_TYPE_LABELS,
@@ -47,6 +48,13 @@ export default function DocumentDetailPage() {
   const params = useParams<{ id: string }>();
   const documentId = params.id;
   const [tab, setTab] = useState("overview");
+  const [newSecurityLevel, setNewSecurityLevel] = useState("");
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [isReanalyzing, setIsReanalyzing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const { user, hasRole } = useAuth();
 
   const { data: document } = useQuery<DocumentOut>({
     queryKey: ["document", documentId],
@@ -67,6 +75,51 @@ export default function DocumentDetailPage() {
   const inProgress = IN_PROGRESS_STATUSES.has(document.status);
   const isLitigation = document.document_category === "LITIGATION";
   const TABS = buildTabs(isLitigation);
+  const canManage = user?.id === document.owner_id || hasRole("SYSTEM_ADMIN");
+  const failureReason = processing?.failure_reason || document.failure_reason;
+
+  async function reanalyze() {
+    setActionError(null);
+    setIsReanalyzing(true);
+    try {
+      await api.post(`/api/documents/${documentId}/reanalyze`);
+      queryClient.invalidateQueries({ queryKey: ["document", documentId] });
+      queryClient.invalidateQueries({ queryKey: ["processing-status", documentId] });
+    } catch (err) {
+      setActionError(extractErrorMessage(err));
+    } finally {
+      setIsReanalyzing(false);
+    }
+  }
+
+  async function changeSecurityLevelAndReanalyze() {
+    if (!newSecurityLevel) return;
+    setActionError(null);
+    setIsReanalyzing(true);
+    try {
+      await api.patch(`/api/documents/${documentId}`, { security_level: newSecurityLevel });
+      await api.post(`/api/documents/${documentId}/reanalyze`);
+      queryClient.invalidateQueries({ queryKey: ["document", documentId] });
+      queryClient.invalidateQueries({ queryKey: ["processing-status", documentId] });
+    } catch (err) {
+      setActionError(extractErrorMessage(err));
+    } finally {
+      setIsReanalyzing(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!confirm("이 문서를 삭제하시겠습니까? 삭제된 문서는 복구할 수 없습니다.")) return;
+    setActionError(null);
+    setIsDeleting(true);
+    try {
+      await api.delete(`/api/documents/${documentId}`);
+      router.push(isLitigation ? "/legal-cases" : "/documents");
+    } catch (err) {
+      setActionError(extractErrorMessage(err));
+      setIsDeleting(false);
+    }
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -96,12 +149,58 @@ export default function DocumentDetailPage() {
           <div className="flex flex-col items-end gap-1">
             <StatusBadge status={document.status} />
             <RiskBadge level={document.overall_risk_level} />
+            {canManage && (
+              <button
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="mt-2 rounded border border-red-300 px-2 py-1 text-xs text-red-600 hover:bg-red-50 disabled:opacity-50"
+              >
+                {isDeleting ? "삭제 중..." : "문서 삭제"}
+              </button>
+            )}
           </div>
         </div>
 
+        {actionError && <p className="mt-2 text-sm text-red-600">{actionError}</p>}
+
         {document.status === "FAILED" && (
           <div className="mt-3 rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700">
-            분석에 실패했습니다. 관리자 또는 법무담당자에게 문의하세요.
+            <p>{failureReason || "분석에 실패했습니다. 관리자 또는 법무담당자에게 문의하세요."}</p>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <button
+                onClick={reanalyze}
+                disabled={isReanalyzing}
+                className="rounded bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                {isReanalyzing ? "재분석 시작 중..." : "재분석 시도"}
+              </button>
+              {canManage && (
+                <>
+                  <span className="text-xs text-red-400">또는 보안등급을 변경 후 재분석:</span>
+                  <select
+                    className="rounded border border-red-300 bg-white px-2 py-1 text-xs text-red-700"
+                    value={newSecurityLevel}
+                    onChange={(e) => setNewSecurityLevel(e.target.value)}
+                  >
+                    <option value="">등급 선택</option>
+                    {Object.entries(SECURITY_LEVEL_LABELS)
+                      .filter(([k]) => k !== document.security_level)
+                      .map(([k, v]) => (
+                        <option key={k} value={k}>
+                          {v}
+                        </option>
+                      ))}
+                  </select>
+                  <button
+                    onClick={changeSecurityLevelAndReanalyze}
+                    disabled={!newSecurityLevel || isReanalyzing}
+                    className="rounded border border-red-400 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-100 disabled:opacity-50"
+                  >
+                    변경 후 재분석
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         )}
 

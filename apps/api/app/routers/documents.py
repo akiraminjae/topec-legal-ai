@@ -65,8 +65,10 @@ def _to_document_out(document: Document) -> DocumentOut:
         security_level=document.security_level,
         retention_policy=document.retention_policy,
         status=document.status,
+        failure_reason=document.failure_reason,
         overall_risk_level=document.overall_risk_level,
         legal_review_required=document.legal_review_required,
+        owner_id=document.owner_id,
         owner_name=document.owner.full_name if document.owner else None,
         created_at=document.created_at,
     )
@@ -169,7 +171,13 @@ def update_document(
     user: User = Depends(get_current_user),
 ):
     document = _get_document_or_404(db, document_id, user)
-    for field, value in payload.model_dump(exclude_unset=True).items():
+    updates = payload.model_dump(exclude_unset=True)
+    if "security_level" in updates and updates["security_level"] is not None:
+        try:
+            SecurityLevel(updates["security_level"])
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=f"잘못된 보안등급입니다: {exc}")
+    for field, value in updates.items():
         setattr(document, field, value)
     db.commit()
     write_audit_log(db, action=AuditAction.DOCUMENT_UPDATED, user_id=user.id, target_type="document", target_id=str(document.id), request=request)

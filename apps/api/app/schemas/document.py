@@ -50,6 +50,7 @@ class DocumentUpdate(BaseModel):
     contract_end_date: date | None = None
     additional_notes: str | None = None
     litigation_document_type: str | None = None
+    security_level: str | None = None
 
 
 class DocumentOut(BaseModel):
@@ -68,8 +69,10 @@ class DocumentOut(BaseModel):
     security_level: str
     retention_policy: str
     status: str
+    failure_reason: str | None = None
     overall_risk_level: str | None = None
     legal_review_required: bool
+    owner_id: uuid.UUID
     owner_name: str | None = None
     created_at: datetime
 

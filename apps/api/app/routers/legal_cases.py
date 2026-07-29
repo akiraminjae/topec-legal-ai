@@ -124,8 +124,10 @@ def _to_case_document_out(cd: CaseDocument, document: Document) -> CaseDocumentO
         title=document.title,
         litigation_document_type=document.litigation_document_type,
         status=document.status,
+        failure_reason=document.failure_reason,
         overall_risk_level=document.overall_risk_level,
         legal_review_required=document.legal_review_required,
+        owner_id=document.owner_id,
         created_at=document.created_at,
         ai_suggested_document_type=cd.ai_suggested_document_type,
         classification_confidence=cd.classification_confidence,
@@ -363,7 +365,7 @@ def list_case_documents(case_id: uuid.UUID, db: Session = Depends(get_db), user:
     out = []
     for cd in case_docs:
         document = db.get(Document, cd.document_id)
-        if document:
+        if document and not document.is_deleted:
             out.append(_to_case_document_out(cd, document))
     return out
 

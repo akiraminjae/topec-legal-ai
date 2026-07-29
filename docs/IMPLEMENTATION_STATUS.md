@@ -31,6 +31,9 @@ API(law.go.kr OpenLaw)가 실키로 연동되어 라이브로 동작 중이며, 
 | 16 | 공유하기 기능 (텍스트/Word/PDF/카카오톡) | 완료 |
 | 17 | 소송·분쟁 사건(LegalCase) 통합관리 — 다중 PDF 일괄업로드 | **부분 완료** (§4.1 참고, 핵심 흐름은 실동작 확인·후속과제 명시) |
 | 18 | 사건 AI 추출 확장 — 문서분류/날짜·사건정보/실제 타임라인/문서관계/모순탐지 | **부분 완료** (§4.1 참고) |
+| 19 | 관리자 승인 회원가입 / 리소스 모니터링·로그 화면 / 개인별 토큰 사용량 | 완료 |
+| 20 | PWA + 안드로이드 설치형 앱(TWA .apk) | 완료 (서명·Digital Asset Links 배포까지 확인) |
+| 21 | 문서 삭제 기능(본인/관리자) + 분석 실패 사유 노출 개선 | 완료 (2026-07-30) |
 
 ## 2. 계정 / 접속 정보
 
@@ -250,6 +253,23 @@ API 유형별로 두 Provider로 분리 구현:
 > 주의: `NEXT_PUBLIC_*` 값은 Next.js 빌드 타임에 클라이언트 번들에 고정되므로, 값을 바꾼 뒤에는
 > `docker compose restart web`이 아니라 `docker compose build web && docker compose up -d web`을
 > 실행해야 반영된다.
+
+## 8.1 문서 삭제 / 분석 실패 사유 노출 (Phase 21, 2026-07-30)
+
+- **문제**: 사용자가 업로드한 판결문(CONFIDENTIAL 등급)이 분석 실패했는데, 화면에는
+  "분석에 실패했습니다. 관리자 또는 법무담당자에게 문의하세요"라는 일반 문구만 떴다.
+- **원인**: 백엔드는 실패 사유(`document.failure_reason` — 이 건은 "CONFIDENTIAL 등급 문서는
+  내부망 AI(LocalModelProvider) 설정이 없으면 분석할 수 없습니다")를 이미 정확히 저장하고
+  있었는데, 문서 상세 화면(`documents/[id]/page.tsx`)이 이 값을 읽지 않고 있었다. CONFIDENTIAL
+  문서를 외부 AI로 보내지 않는 것 자체는 의도된 보안정책(§5 Local Model 항목 참고)이라 버그가
+  아니지만, 그 사유를 사용자에게 숨긴 것은 버그였다.
+- **수정**: ① 실제 `failure_reason`을 그대로 노출, ② "재분석 시도" 버튼, ③ 문서
+  소유자/`SYSTEM_ADMIN`에 한해 보안등급을 바꾼 뒤 바로 재분석을 트리거하는 인라인 컨트롤 추가.
+- **문서 삭제**: `DELETE /api/documents/{id}`(본인 또는 `SYSTEM_ADMIN`만 허용)는 이미 백엔드에
+  구현되어 있었으나 어느 화면에도 버튼이 없었다. 내 문서 목록(`documents/page.tsx`), 사건 문서
+  목록(`legal-cases/[id]/tabs/DocumentsTab.tsx`), 문서 상세 페이지 세 곳에 삭제 버튼을 추가했다.
+- **부수 수정**: 사건 문서 목록 API(`GET /api/legal-cases/{id}/documents`)가 소프트 삭제된
+  문서를 걸러내지 않던 것도 함께 수정.
 
 ## 9. 남은 이슈 / 후속 과제
 
