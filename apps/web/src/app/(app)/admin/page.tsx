@@ -148,6 +148,9 @@ function UsersPanel({ users, departments }: { users: UserOut[]; departments: Dep
   const [form, setForm] = useState({ employee_no: "", email: "", full_name: "", department_id: "", role: "USER" });
   const [tempPassword, setTempPassword] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [editRoles, setEditRoles] = useState<Set<string>>(new Set());
+  const [savingRoles, setSavingRoles] = useState(false);
 
   async function createUser(e: React.FormEvent) {
     e.preventDefault();
@@ -172,6 +175,44 @@ function UsersPanel({ users, departments }: { users: UserOut[]; departments: Dep
     const action = user.is_active ? "deactivate" : "activate";
     await api.post(`/api/users/${user.id}/${action}`);
     queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+  }
+
+  function startEditRoles(user: UserOut) {
+    setError(null);
+    setEditingUserId(user.id);
+    setEditRoles(new Set(user.roles));
+  }
+
+  function cancelEditRoles() {
+    setEditingUserId(null);
+    setEditRoles(new Set());
+  }
+
+  function toggleEditRole(role: string) {
+    setEditRoles((prev) => {
+      const next = new Set(prev);
+      if (next.has(role)) {
+        next.delete(role);
+      } else {
+        next.add(role);
+      }
+      return next;
+    });
+  }
+
+  async function saveRoles(userId: string) {
+    setError(null);
+    setSavingRoles(true);
+    try {
+      await api.patch(`/api/users/${userId}`, { roles: Array.from(editRoles) });
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      setEditingUserId(null);
+      setEditRoles(new Set());
+    } catch (err) {
+      setError(extractErrorMessage(err));
+    } finally {
+      setSavingRoles(false);
+    }
   }
 
   return (
@@ -227,18 +268,55 @@ function UsersPanel({ users, departments }: { users: UserOut[]; departments: Dep
           </thead>
           <tbody>
             {users.map((u) => (
-              <tr key={u.id} className="border-b border-slate-100">
+              <tr key={u.id} className="border-b border-slate-100 align-top">
                 <td className="p-3">{u.employee_no}</td>
                 <td>{u.full_name}</td>
                 <td>{u.email}</td>
                 <td>{u.phone_number || "-"}</td>
                 <td>{u.department || "-"}</td>
-                <td>{u.roles.map((r) => ROLE_LABELS[r] || r).join(", ")}</td>
+                <td className="max-w-xs py-2">
+                  {editingUserId === u.id ? (
+                    <div className="flex flex-col gap-1">
+                      {Object.entries(ROLE_LABELS).map(([roleKey, label]) => (
+                        <label key={roleKey} className="flex items-center gap-1.5 text-xs text-slate-700">
+                          <input
+                            type="checkbox"
+                            checked={editRoles.has(roleKey)}
+                            onChange={() => toggleEditRole(roleKey)}
+                          />
+                          {label}
+                        </label>
+                      ))}
+                    </div>
+                  ) : (
+                    u.roles.map((r) => ROLE_LABELS[r] || r).join(", ") || "-"
+                  )}
+                </td>
                 <td>{userStatusLabel(u)}</td>
                 <td>
-                  <button onClick={() => toggleActive(u)} className="text-xs text-brand-600 hover:underline">
-                    {u.is_active ? "비활성화" : "활성화"}
-                  </button>
+                  {editingUserId === u.id ? (
+                    <div className="flex flex-col gap-1">
+                      <button
+                        onClick={() => saveRoles(u.id)}
+                        disabled={savingRoles}
+                        className="text-xs text-brand-600 hover:underline disabled:opacity-50"
+                      >
+                        저장
+                      </button>
+                      <button onClick={cancelEditRoles} className="text-xs text-slate-500 hover:underline">
+                        취소
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-1">
+                      <button onClick={() => startEditRoles(u)} className="text-xs text-brand-600 hover:underline">
+                        권한 수정
+                      </button>
+                      <button onClick={() => toggleActive(u)} className="text-xs text-slate-500 hover:underline">
+                        {u.is_active ? "비활성화" : "활성화"}
+                      </button>
+                    </div>
+                  )}
                 </td>
               </tr>
             ))}
