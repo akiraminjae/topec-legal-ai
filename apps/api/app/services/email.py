@@ -77,3 +77,29 @@ def send_signup_verification_email(to: str, full_name: str, verification_url: st
     """
     text_body = f"{full_name}님, 아래 링크를 클릭해 이메일 인증을 완료해주세요 (24시간 유효):\n{verification_url}"
     send_email(to, subject, html_body, text_body)
+
+
+def send_admin_approval_request_email(
+    to: str, full_name: str, employee_no: str, email: str, admin_approvals_url: str
+) -> None:
+    subject = f"[TOPEC Legal AI] 신규 가입 승인 요청 — {full_name}"
+    html_body = f"""
+    <div style="font-family: -apple-system, sans-serif; max-width: 480px; margin: 0 auto; color: #1e293b;">
+      <h2 style="color: #0f4c81;">신규 가입 승인 요청이 있습니다</h2>
+      <p>아래 사용자가 이메일 인증을 완료하고 관리자 승인을 기다리고 있습니다.</p>
+      <table style="border-collapse: collapse; margin: 16px 0; font-size: 14px;">
+        <tr><td style="color:#64748b;padding:4px 12px 4px 0;">이름</td><td>{full_name}</td></tr>
+        <tr><td style="color:#64748b;padding:4px 12px 4px 0;">사용자 ID</td><td>{employee_no}</td></tr>
+        <tr><td style="color:#64748b;padding:4px 12px 4px 0;">이메일</td><td>{email}</td></tr>
+      </table>
+      <p style="margin: 24px 0;">
+        <a href="{admin_approvals_url}" style="background:#0f4c81;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;">가입 승인 화면으로 이동</a>
+      </p>
+      <p style="font-size: 13px; color: #64748b;">버튼이 동작하지 않으면 아래 링크를 브라우저에 붙여넣으세요.<br>{admin_approvals_url}</p>
+    </div>
+    """
+    text_body = (
+        f"신규 가입 승인 요청: {full_name} ({employee_no}, {email})\n"
+        f"승인 화면: {admin_approvals_url}"
+    )
+    send_email(to, subject, html_body, text_body)

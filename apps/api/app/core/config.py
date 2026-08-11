@@ -44,6 +44,9 @@ class Settings(BaseSettings):
     SIGNUP_VERIFICATION_TOKEN_TTL_HOURS: int = 24
     # 인증 메일 링크에 사용할 프론트엔드 공개 URL (마지막 슬래시 없이)
     APP_PUBLIC_URL: str = "http://localhost:3000"
+    # 이메일 인증까지 마친 가입 신청(관리자 승인 대기)이 생기면 이 주소로 알림 메일을 보낸다.
+    # 비워두면 알림을 보내지 않는다.
+    ADMIN_NOTIFICATION_EMAIL: str = "minjae.kim@topec.co.kr"
 
     # ---- 메일 발송 ----
     # RESEND_API_KEY가 설정되어 있으면 Resend HTTP API(포트 443)로 발송한다 — SMTP 포트가

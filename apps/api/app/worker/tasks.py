@@ -78,6 +78,35 @@ def send_verification_email_task(self, user_id: str, token: str) -> str:
         db.close()
 
 
+@celery_app.task(name="app.worker.tasks.send_admin_approval_notification_task", bind=True, max_retries=2, default_retry_delay=30)
+def send_admin_approval_notification_task(self, user_id: str) -> str:
+    """Notifies the admin inbox (ADMIN_NOTIFICATION_EMAIL) as soon as a signup
+    reaches PENDING_ADMIN_APPROVAL, so approvals don't just sit unnoticed until
+    someone happens to open the admin screen."""
+    from app.core.config import get_settings
+    from app.models.user import User
+    from app.services.email import send_admin_approval_request_email
+
+    settings = get_settings()
+    if not settings.ADMIN_NOTIFICATION_EMAIL:
+        return "SKIPPED"
+    db = SessionLocal()
+    try:
+        user = db.get(User, user_id)
+        if not user:
+            return "MISSING"
+        admin_approvals_url = f"{settings.APP_PUBLIC_URL}/admin"
+        try:
+            send_admin_approval_request_email(
+                settings.ADMIN_NOTIFICATION_EMAIL, user.full_name, user.employee_no, user.email, admin_approvals_url
+            )
+        except Exception as exc:  # noqa: BLE001 — retry transient SMTP failures
+            raise self.retry(exc=exc)
+        return "OK"
+    finally:
+        db.close()
+
+
 @celery_app.task(name="app.worker.tasks.process_document_task", bind=True, max_retries=0)
 def process_document_task(self, document_id: str) -> str:
     from app.models.document import Document

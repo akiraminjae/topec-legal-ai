@@ -236,6 +236,7 @@ def verify_email(token: str, request: Request, db: Session = Depends(get_db)):
     user.approval_status = ApprovalStatus.PENDING_ADMIN_APPROVAL.value
     db.commit()
     write_audit_log(db, action=AuditAction.SIGNUP_EMAIL_VERIFIED, user_id=user.id, request=request)
+    celery_app.send_task("app.worker.tasks.send_admin_approval_notification_task", args=[str(user.id)])
 
     return MessageOut(message="이메일 인증이 완료되었습니다. 관리자 승인이 완료되면 로그인할 수 있습니다.")
 
