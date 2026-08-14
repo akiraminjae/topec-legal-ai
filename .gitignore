@@ -37,3 +37,5 @@ mobile/android-twa/app/build/
 mobile/android-twa/*.apk
 mobile/android-twa/*.apk.idsig
 mobile/android-twa/*.aab
+mobile/android-twa/*.7z
+mobile/android-twa/*.zip
