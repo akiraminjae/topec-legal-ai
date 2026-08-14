@@ -30,13 +30,16 @@ export function CaseReportsTab({ caseId }: { caseId: string }) {
     }
   }
 
-  async function download(reportId: string) {
+  async function download(reportId: string, format: string, reportType: string) {
     const res = await api.get(`/api/legal-cases/${caseId}/reports/${reportId}/download`, { responseType: "blob" });
-    const url = window.URL.createObjectURL(new Blob([res.data]));
+    const ext = format === "PDF" ? "pdf" : "docx";
+    const label = CASE_REPORT_TYPE_LABELS[reportType] || reportType;
+    const url = window.URL.createObjectURL(res.data);
     const a = window.document.createElement("a");
     a.href = url;
-    a.download = "case-report";
+    a.download = `${label}.${ext}`;
     a.click();
+    URL.revokeObjectURL(url);
   }
 
   return (
@@ -79,7 +82,7 @@ export function CaseReportsTab({ caseId }: { caseId: string }) {
                 {CASE_REPORT_TYPE_LABELS[r.report_type] || r.report_type} ({r.format})
                 {r.pdf_conversion_failed && <span className="ml-2 text-xs text-amber-600">PDF 변환 실패 → DOCX 제공</span>}
               </span>
-              <button onClick={() => download(r.id)} className="text-brand-600 hover:underline">
+              <button onClick={() => download(r.id, r.format, r.report_type)} className="text-brand-600 hover:underline">
                 다운로드
               </button>
             </li>

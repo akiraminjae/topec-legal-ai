@@ -68,13 +68,17 @@ export function OverviewTab({ documentId, document }: { documentId: string; docu
     }
   }
 
-  async function download(reportId: string) {
+  async function download(reportId: string, format: string, reportType: string) {
     const res = await api.get(`/api/documents/${documentId}/reports/${reportId}/download`, { responseType: "blob" });
-    const url = window.URL.createObjectURL(new Blob([res.data]));
+    const ext = format === "PDF" ? "pdf" : "docx";
+    const label = reportType === "REVISION_REQUEST_LETTER" ? "수정요청서" : "검토보고서";
+    const safeTitle = (document.title || "문서").replace(/[\\/:*?"<>|]/g, "_");
+    const url = window.URL.createObjectURL(res.data);
     const a = window.document.createElement("a");
     a.href = url;
-    a.download = "report";
+    a.download = `${safeTitle}_${label}.${ext}`;
     a.click();
+    URL.revokeObjectURL(url);
   }
 
   async function generateAndDownload(format: "DOCX" | "PDF") {
@@ -83,7 +87,7 @@ export function OverviewTab({ documentId, document }: { documentId: string; docu
     try {
       const res = await api.post(`/api/documents/${documentId}/reports`, { report_type: "REVIEW_REPORT", format });
       queryClient.invalidateQueries({ queryKey: ["reports", documentId] });
-      await download(res.data.id);
+      await download(res.data.id, res.data.format, "REVIEW_REPORT");
     } catch (err) {
       setError(extractErrorMessage(err));
     } finally {
@@ -228,7 +232,7 @@ export function OverviewTab({ documentId, document }: { documentId: string; docu
                 {r.report_type === "REVISION_REQUEST_LETTER" ? "수정요청서" : "검토보고서"} ({r.format})
                 {r.pdf_conversion_failed && <span className="ml-2 text-xs text-amber-600">PDF 변환 실패 → DOCX 제공</span>}
               </span>
-              <button onClick={() => download(r.id)} className="text-brand-600 hover:underline">
+              <button onClick={() => download(r.id, r.format, r.report_type)} className="text-brand-600 hover:underline">
                 다운로드
               </button>
             </li>
