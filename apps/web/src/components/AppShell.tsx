@@ -8,7 +8,22 @@ import { ROLE_LABELS } from "@/lib/labels";
 
 // exact: 하위 경로까지 활성 표시하지 않을 항목. "사용자 매뉴얼"(/manual)이
 // "관리자 매뉴얼"(/manual/admin)까지 함께 강조되는 것을 막습니다.
-const NAV_ITEMS: { href: string; label: string; roles: string[] | null; exact?: boolean }[] = [
+// idle/active: 업무 메뉴(기본 파랑)와 성격이 다른 매뉴얼을 색으로 구분합니다.
+// Tailwind는 클래스명을 정적으로 스캔하므로 `text-${color}-700` 같은 동적 조합은
+// 빌드에서 제거됩니다 — 반드시 완성된 문자열로 지정해야 합니다.
+type NavItem = {
+  href: string;
+  label: string;
+  roles: string[] | null;
+  exact?: boolean;
+  idle?: string;
+  active?: string;
+};
+
+const DEFAULT_IDLE = "text-slate-600 hover:bg-slate-50";
+const DEFAULT_ACTIVE = "bg-brand-50 font-semibold text-brand-700";
+
+const NAV_ITEMS: NavItem[] = [
   { href: "/dashboard", label: "대시보드", roles: null },
   { href: "/documents", label: "내 문서", roles: null },
   { href: "/documents/new", label: "계약서 업로드", roles: null },
@@ -22,8 +37,21 @@ const NAV_ITEMS: { href: string; label: string; roles: string[] | null; exact?: 
   { href: "/admin/monitoring", label: "리소스 모니터링", roles: ["SYSTEM_ADMIN"] },
   { href: "/admin/logs", label: "로그 기록", roles: ["SYSTEM_ADMIN"] },
   // 매뉴얼 — 사용자 매뉴얼은 전체 사용자, 관리자 매뉴얼은 시스템관리자에게만 보입니다.
-  { href: "/manual", label: "사용자 매뉴얼", roles: null, exact: true },
-  { href: "/manual/admin", label: "관리자 매뉴얼", roles: ["SYSTEM_ADMIN"] },
+  {
+    href: "/manual",
+    label: "사용자 매뉴얼",
+    roles: null,
+    exact: true,
+    idle: "text-emerald-700 hover:bg-emerald-50",
+    active: "bg-emerald-50 font-semibold text-emerald-800",
+  },
+  {
+    href: "/manual/admin",
+    label: "관리자 매뉴얼",
+    roles: ["SYSTEM_ADMIN"],
+    idle: "text-amber-700 hover:bg-amber-50",
+    active: "bg-amber-50 font-semibold text-amber-800",
+  },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -69,7 +97,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 key={item.href}
                 href={item.href}
                 className={`rounded px-3 py-2 text-sm ${
-                  active ? "bg-brand-50 font-semibold text-brand-700" : "text-slate-600 hover:bg-slate-50"
+                  active ? item.active ?? DEFAULT_ACTIVE : item.idle ?? DEFAULT_IDLE
                 }`}
               >
                 {item.label}
