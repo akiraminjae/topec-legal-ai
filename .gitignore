@@ -39,3 +39,6 @@ mobile/android-twa/*.apk.idsig
 mobile/android-twa/*.aab
 mobile/android-twa/*.7z
 mobile/android-twa/*.zip
+
+# TypeScript incremental build info
+*.tsbuildinfo
