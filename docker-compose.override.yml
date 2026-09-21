@@ -1,0 +1,19 @@
+# 로컬 개발용 — `docker compose up` 시 docker-compose.yml 과 자동으로 합쳐집니다.
+# 운영 서버는 COMPOSE_FILE 로 파일을 명시하므로 이 파일을 읽지 않습니다.
+services:
+  postgres:
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+
+  minio:
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+
+  api:
+    ports:
+      - "${API_PORT:-8000}:8000"
+
+  web:
+    ports:
+      - "${WEB_PORT:-3000}:3000"

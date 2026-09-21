@@ -1,3 +1,7 @@
+# 공통 서비스 정의 — 호스트 포트는 여기서 열지 않습니다.
+#   로컬 개발: docker-compose.override.yml 이 자동으로 함께 로드되어 포트를 엽니다.
+#   운영 서버: .env 의 COMPOSE_FILE=docker-compose.yml:docker-compose.prod.yml
+#             (Caddy 리버스 프록시만 80/443 공개, DB·MinIO는 외부 비공개)
 services:
   postgres:
     image: pgvector/pgvector:pg16
@@ -8,8 +12,8 @@ services:
       TZ: Asia/Seoul
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+    expose:
+      - "5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-topec}"]
       interval: 5s
@@ -34,9 +38,9 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-topec_minio_secret}
     volumes:
       - minio_data:/data
-    ports:
-      - "${MINIO_API_PORT:-9000}:9000"
-      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    expose:
+      - "9000"
+      - "9001"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 5s
@@ -54,8 +58,6 @@ services:
     env_file: .env
     environment:
       DATABASE_URL: ${DATABASE_URL}
-    ports:
-      - "${API_PORT:-8000}:8000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -93,8 +95,8 @@ services:
         NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8000}
         NEXT_PUBLIC_KAKAO_JS_KEY: ${NEXT_PUBLIC_KAKAO_JS_KEY:-}
     env_file: .env
-    ports:
-      - "${WEB_PORT:-3000}:3000"
+    expose:
+      - "3000"
     depends_on:
       - api
 

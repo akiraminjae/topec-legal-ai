@@ -160,7 +160,7 @@
 
 # 11. 배포/운영 참고
 
-서버 재배포, Docker 명령어, 접속정보(SSH 키·서버 IP) 등 인프라 운영에 관한 절차는 보안상 이 매뉴얼에 포함하지 않습니다. 해당 내용은 `docs/MASTER_REBUILD_GUIDE.md`와 `docs/IMPLEMENTATION_STATUS.md`(개발팀/운영팀 전용 기술 문서)를 참고하거나 개발 담당자에게 문의하세요.
+서버 재배포, Docker 명령어, 접속정보(SSH 키·서버 IP) 등 인프라 운영에 관한 절차는 보안상 이 매뉴얼에 포함하지 않습니다. 해당 내용은 `docs/DEPLOYMENT.md`, `docs/MASTER_REBUILD_GUIDE.md`, `docs/IMPLEMENTATION_STATUS.md`(개발팀/운영팀 전용 기술 문서)를 참고하거나 개발 담당자에게 문의하세요.
 
 ---
 

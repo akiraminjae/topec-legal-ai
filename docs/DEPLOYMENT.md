@@ -16,6 +16,21 @@ docker compose up --build -d
 
 최초 기동 시 `api` 서비스가 자동으로 `alembic upgrade head`를 실행해 스키마를 생성한다.
 
+### Compose 파일 구성
+
+| 파일 | 용도 | 로드 시점 |
+|---|---|---|
+| `docker-compose.yml` | 공통 서비스 정의. 호스트 포트를 열지 않음 | 항상 |
+| `docker-compose.override.yml` | 로컬 개발용 포트 공개(웹 3000, API 8000, DB 5432, MinIO 9000/9001) | 로컬에서 `docker compose` 실행 시 자동 |
+| `docker-compose.prod.yml` | 운영용. Caddy(80/443)만 외부 공개, API는 `127.0.0.1`에만 바인딩 | `.env`의 `COMPOSE_FILE`로 지정할 때만 |
+
+운영 서버의 `.env`에는 반드시 아래 한 줄이 있어야 한다. 없으면 개발용 override가 로드되어
+**DB·MinIO 포트가 인터넷에 열린다.** `scripts/deploy.sh`는 이 줄이 없으면 배포를 거부한다.
+
+```bash
+COMPOSE_FILE=docker-compose.yml:docker-compose.prod.yml
+```
+
 ## 3. 초기 관리자 생성(시드)
 
 ```bash
@@ -29,11 +44,12 @@ USER)이 생성된다. 이 계정들은 `must_change_password=true`로 생성되
 
 ## 4. HTTPS
 
-이 Docker Compose 구성은 평문 HTTP로 로컬/사내망 배포를 전제로 한다. 운영 배포 시:
+현재 운영(`https://app.topecai.co.kr`)은 **Cloudflare가 TLS를 처리**하고, 서버의 Caddy는 `:80`으로
+받아 `/api/*`는 `api:8000`, 나머지는 `web:3000`으로 넘긴다(`infrastructure/caddy/Caddyfile`).
 
-1. `infrastructure/nginx`에 리버스 프록시 설정을 추가하고 TLS 인증서(사내 CA 또는 공인 인증서)를 적용
+1. Cloudflare DNS를 프록시(주황 구름) 상태로 두어 원 서버 IP를 숨긴다
 2. `.env`에서 `COOKIE_SECURE=true`로 설정해 세션 쿠키에 `Secure` 속성을 강제
-3. `ALLOWED_ORIGINS`를 실제 서비스 도메인(`https://legal.topec.co.kr`)으로 제한
+3. `ALLOWED_ORIGINS`를 실제 서비스 도메인으로 제한
 
 ## 5. 백업
 
@@ -49,14 +65,24 @@ docker compose exec -T postgres psql -U <user> <db> < backup.sql
 
 MinIO는 볼륨을 복원하거나 `mc mirror`로 백업 스토리지에서 복사한다.
 
-## 7. 업데이트
+## 7. 업데이트 (운영 배포)
+
+운영 서버 `/opt/topec-legal-ai`는 이 레포의 git 체크아웃이다. `main`에 반영된 코드는 서버에서
+아래 한 줄로 배포한다.
 
 ```bash
-git pull
-docker compose build
-docker compose exec api alembic upgrade head   # 새 마이그레이션 적용
-docker compose up -d
+cd /opt/topec-legal-ai && bash scripts/deploy.sh
 ```
+
+`scripts/deploy.sh`가 하는 일:
+
+1. `.env`의 `COMPOSE_FILE`이 운영 구성인지 확인 (아니면 중단)
+2. 서버에 커밋되지 않은 수정이 있으면 중단 — 서버에서 파일을 직접 고치지 말고 레포에 반영할 것
+3. `git pull --ff-only`로 `main` 최신화 (변경 없으면 종료)
+4. `docker compose up -d --build` — 이미지가 바뀐 서비스만 재생성
+5. `apps/api`가 바뀌었으면 worker 재시작 (진행 중인 분석이 끝날 때까지 최대 10분 대기)
+6. `alembic upgrade head`로 DB 마이그레이션 적용
+   (api는 `--reload`로 코드가 자동 반영되지만, 마이그레이션은 컨테이너 기동 시에만 돌기 때문)
 
 ## 8. 로그 확인
 
