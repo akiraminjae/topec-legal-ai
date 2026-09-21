@@ -74,6 +74,8 @@ MinIO는 볼륨을 복원하거나 `mc mirror`로 백업 스토리지에서 복�
 cd /opt/topec-legal-ai && bash scripts/deploy.sh
 ```
 
+새 커밋이 없어도 전체를 다시 적용하려면(배포가 중간에 실패했을 때 등) `bash scripts/deploy.sh --force`.
+
 `scripts/deploy.sh`가 하는 일:
 
 1. `.env`의 `COMPOSE_FILE`이 운영 구성인지 확인 (아니면 중단)
