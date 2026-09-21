@@ -41,6 +41,8 @@ from app.schemas.legal_case import (
     LegalCaseUpdate,
     TimelineEntryOut,
 )
+from app.services.ai.alerts import notify_admin_of_provider_failure
+from app.services.ai.errors import AIProviderCallError
 from app.services.ai.prompts import CHAT_SYSTEM_PROMPT, build_chat_user_prompt
 from app.services.ai.router import AIRoutingBlockedError, get_ai_provider_for_document
 from app.services.ai.schema import AIOutputValidationError, validate_citations_exist
@@ -682,6 +684,9 @@ def send_case_chat_message(
         answer, usage = provider.answer_chat(CHAT_SYSTEM_PROMPT, user_prompt)
     except AIOutputValidationError as exc:
         raise HTTPException(status_code=502, detail=f"AI 응답 처리에 실패했습니다: {exc}")
+    except AIProviderCallError as exc:
+        notify_admin_of_provider_failure(exc)
+        raise HTTPException(status_code=503, detail=exc.user_message) from exc
 
     verified_citations = validate_citations_exist(answer.citations, known_chunk_ids)
 

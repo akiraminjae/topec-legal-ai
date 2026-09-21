@@ -1,7 +1,8 @@
-from tenacity import retry, stop_after_attempt, wait_fixed
+from tenacity import retry, retry_if_exception, stop_after_attempt, wait_fixed
 
 from app.core.config import get_settings
 from app.services.ai.base import AIProvider, AIProviderNotConfiguredError, AnalysisContext, TokenUsage
+from app.services.ai.errors import is_retryable, translate_provider_errors
 from app.services.ai.json_utils import parse_structured_output
 from app.services.ai.schema import AIAnalysisOutput, AIChatAnswer
 
@@ -24,7 +25,8 @@ class AnthropicProvider(AIProvider):
         )
         self._model = settings.AI_MODEL or "claude-sonnet-5"
 
-    @retry(stop=stop_after_attempt(2), wait=wait_fixed(1))
+    @translate_provider_errors
+    @retry(stop=stop_after_attempt(2), wait=wait_fixed(1), retry=retry_if_exception(is_retryable), reraise=True)
     def _call(self, system_prompt: str, user_prompt: str) -> tuple[str, TokenUsage]:
         response = self._client.messages.create(
             model=self._model,

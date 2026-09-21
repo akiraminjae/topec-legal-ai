@@ -13,7 +13,9 @@ from app.models.admin import AIUsageLog
 from app.models.analysis import AICrossReview, AnalysisRun, Citation, DocumentSummary, RecommendedRevision, RiskFinding, RiskRule, RiskRuleResult
 from app.models.document import Document, DocumentClause, DocumentExtractedPage, DocumentFile, DocumentMetadataExtraction, DocumentProcessingJob
 from app.models.enums import ContractType, DocumentStatus, RevisionLevel, SecurityLevel, SourceType, TopecPosition, CONTRACT_TYPE_LABELS_KO, TOPEC_POSITION_LABELS_KO
+from app.services.ai.alerts import notify_admin_of_provider_failure
 from app.services.ai.base import AnalysisContext
+from app.services.ai.errors import AIProviderCallError
 from app.services.ai.prompts import ANALYSIS_SYSTEM_PROMPT, build_analysis_user_prompt
 from app.services.ai.router import AIRoutingBlockedError, get_ai_provider_for_document
 from app.services.ai.schema import AIOutputValidationError, validate_citations_exist
@@ -400,6 +402,15 @@ def process_document(db: Session, document_id) -> None:
                 document.status = DocumentStatus.FAILED
                 document.failure_reason = "AI 응답 구조 검증에 반복적으로 실패하여 분석 일부가 완료되지 못했습니다."
                 db.commit()
+                raise PipelineError(document.failure_reason) from exc
+            except AIProviderCallError as exc:
+                analysis_run.status = "FAILED"
+                analysis_run.error_message = exc.detail or exc.user_message
+                db.commit()
+                document.status = DocumentStatus.FAILED
+                document.failure_reason = exc.user_message
+                db.commit()
+                notify_admin_of_provider_failure(exc)
                 raise PipelineError(document.failure_reason) from exc
 
             db.add(

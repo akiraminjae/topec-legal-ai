@@ -11,7 +11,9 @@ from sqlalchemy.orm import Session
 from app.models.document import Document, DocumentExtractedPage
 from app.models.enums import SecurityLevel
 from app.models.legal_case import CaseDocument, CaseDocumentDate
+from app.services.ai.alerts import notify_admin_of_provider_failure
 from app.services.ai.case_extraction_schema import DocumentMetadataExtraction
+from app.services.ai.errors import AIProviderCallError
 from app.services.ai.json_schemas import DOCUMENT_METADATA_EXTRACTION_SCHEMA
 from app.services.ai.router import AIRoutingBlockedError, get_ai_provider_for_document
 from app.services.ai.schema import AIOutputValidationError
@@ -67,6 +69,12 @@ def extract_case_document_metadata(db: Session, case_id, document_id) -> None:
     try:
         result, _usage = provider.extract_structured(_SYSTEM_PROMPT, user_prompt, DocumentMetadataExtraction)
     except AIOutputValidationError:
+        case_document.needs_user_confirmation = True
+        db.commit()
+        return
+    except AIProviderCallError as exc:
+        # 부가 추출 단계라 실패해도 업로드 흐름은 계속 — 응답 검증 실패와 같게 사용자 확인으로 넘깁니다.
+        notify_admin_of_provider_failure(exc)
         case_document.needs_user_confirmation = True
         db.commit()
         return

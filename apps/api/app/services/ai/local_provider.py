@@ -6,10 +6,11 @@ the integration point future on-prem deployments should point at.
 """
 import httpx
 from pydantic import ValidationError
-from tenacity import retry, stop_after_attempt, wait_fixed
+from tenacity import retry, retry_if_exception, stop_after_attempt, wait_fixed
 
 from app.core.config import get_settings
 from app.services.ai.base import AIProvider, AIProviderNotConfiguredError, AnalysisContext, TokenUsage
+from app.services.ai.errors import is_retryable, translate_provider_errors
 from app.services.ai.json_utils import extract_json
 from app.services.ai.schema import AIAnalysisOutput, AIChatAnswer, AIOutputValidationError
 
@@ -28,7 +29,8 @@ class LocalModelProvider(AIProvider):
             )
         self._endpoint = settings.LOCAL_MODEL_ENDPOINT
 
-    @retry(stop=stop_after_attempt(2), wait=wait_fixed(1))
+    @translate_provider_errors
+    @retry(stop=stop_after_attempt(2), wait=wait_fixed(1), retry=retry_if_exception(is_retryable), reraise=True)
     def _call(self, system_prompt: str, user_prompt: str) -> tuple[str, TokenUsage]:
         with httpx.Client(timeout=settings.AI_REQUEST_TIMEOUT) as client:
             response = client.post(

@@ -107,6 +107,25 @@ def send_admin_approval_notification_task(self, user_id: str) -> str:
         db.close()
 
 
+@celery_app.task(name="app.worker.tasks.send_ai_provider_alert_task", bind=True, max_retries=2, default_retry_delay=30)
+def send_ai_provider_alert_task(self, kind: str, provider: str, detail: str) -> str:
+    """AI 크레딧 소진·API 인증 실패처럼 관리자가 조치해야만 풀리는 오류를 알립니다.
+    중복 발송 방지(쿨다운)는 호출하는 쪽(services/ai/alerts.py)에서 처리합니다."""
+    from app.core.config import get_settings
+    from app.services.email import send_ai_provider_alert_email
+
+    settings = get_settings()
+    if not settings.ADMIN_NOTIFICATION_EMAIL:
+        return "SKIPPED"
+    try:
+        send_ai_provider_alert_email(
+            settings.ADMIN_NOTIFICATION_EMAIL, kind, provider, detail, f"{settings.APP_PUBLIC_URL}/admin"
+        )
+    except Exception as exc:  # noqa: BLE001 — retry transient mail failures
+        raise self.retry(exc=exc)
+    return "OK"
+
+
 @celery_app.task(name="app.worker.tasks.process_document_task", bind=True, max_retries=0)
 def process_document_task(self, document_id: str) -> str:
     from app.models.document import Document

@@ -6,10 +6,11 @@ so there's one fewer SDK dependency to pin/verify, and JSON-mode structured
 output is a single well-documented request field.
 """
 import httpx
-from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
+from tenacity import retry, retry_if_exception, stop_after_attempt, wait_fixed
 
 from app.core.config import get_settings
 from app.services.ai.base import AIProvider, AIProviderNotConfiguredError, AnalysisContext, TokenUsage
+from app.services.ai.errors import is_retryable, translate_provider_errors
 from app.services.ai.json_utils import parse_structured_output
 from app.services.ai.schema import AIAnalysisOutput, AIChatAnswer, AIOutputValidationError
 
@@ -32,11 +33,8 @@ class GeminiProvider(AIProvider):
         self._base_url = base_url or settings.AI_BASE_URL or DEFAULT_GEMINI_BASE_URL
         self._model = model or settings.AI_MODEL or "gemini-flash-latest"
 
-    @retry(
-        stop=stop_after_attempt(2),
-        wait=wait_fixed(1),
-        retry=retry_if_exception_type((httpx.TimeoutException, httpx.TransportError)),
-    )
+    @translate_provider_errors
+    @retry(stop=stop_after_attempt(2), wait=wait_fixed(1), retry=retry_if_exception(is_retryable), reraise=True)
     def _call(self, system_prompt: str, user_prompt: str) -> tuple[str, TokenUsage]:
         url = f"{self._base_url.rstrip('/')}/models/{self._model}:generateContent"
         body = {

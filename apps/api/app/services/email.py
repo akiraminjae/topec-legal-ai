@@ -1,3 +1,4 @@
+import html
 import logging
 import smtplib
 from email.message import EmailMessage
@@ -101,5 +102,58 @@ def send_admin_approval_request_email(
     text_body = (
         f"신규 가입 승인 요청: {full_name} ({employee_no}, {email})\n"
         f"승인 화면: {admin_approvals_url}"
+    )
+    send_email(to, subject, html_body, text_body)
+
+
+_AI_ALERT_GUIDE = {
+    "credit_exhausted": (
+        "AI 크레딧 소진",
+        "AI 공급자 계정의 크레딧(이용 한도)이 소진되어 모든 AI 분석이 실패하고 있습니다.",
+        "AI 공급자 콘솔의 결제(Plans &amp; Billing) 메뉴에서 크레딧을 충전해 주세요. "
+        "재발 방지를 위해 자동 충전(auto-reload) 설정을 권장합니다.",
+    ),
+    "auth": (
+        "AI API 인증 실패",
+        "AI 공급자가 API 키를 거부하여 모든 AI 분석이 실패하고 있습니다.",
+        "서버 .env의 AI_API_KEY가 유효한지(만료·삭제·권한 변경 여부) 확인해 주세요.",
+    ),
+}
+
+
+def send_ai_provider_alert_email(to: str, kind: str, provider: str, detail: str, admin_url: str) -> None:
+    title, situation, action = _AI_ALERT_GUIDE[kind]
+    subject = f"[TOPEC Legal AI] {title} — AI 분석이 중단되었습니다"
+    detail_block = (
+        f'<pre style="background:#f1f5f9;padding:12px;border-radius:6px;font-size:12px;'
+        f'white-space:pre-wrap;">{html.escape(detail)}</pre>'
+        if detail
+        else ""
+    )
+    html_body = f"""
+    <div style="font-family: -apple-system, sans-serif; max-width: 520px; margin: 0 auto; color: #1e293b;">
+      <h2 style="color: #b91c1c;">{title}</h2>
+      <p>{situation}</p>
+      <p><b>조치:</b> {action}</p>
+      <p>조치 후 실패한 문서는 문서 화면의 <b>[재분석 시도]</b>로 다시 분석할 수 있습니다.</p>
+      <table style="border-collapse: collapse; margin: 16px 0; font-size: 14px;">
+        <tr><td style="color:#64748b;padding:4px 12px 4px 0;">AI 공급자</td><td>{html.escape(provider or "-")}</td></tr>
+      </table>
+      {detail_block}
+      <p style="margin: 24px 0;">
+        <a href="{admin_url}" style="background:#0f4c81;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;">관리자 화면으로 이동</a>
+      </p>
+      <p style="font-size: 13px; color: #64748b;">같은 원인의 알림은 6시간에 한 번만 발송됩니다.</p>
+    </div>
+    """
+    text_body = "\n".join(
+        [
+            f"{title} ({provider or '-'})",
+            situation,
+            f"조치: {action.replace('&amp;', '&')}",
+            "조치 후 실패한 문서는 [재분석 시도]로 다시 분석할 수 있습니다.",
+            detail,
+            f"관리자 화면: {admin_url}",
+        ]
     )
     send_email(to, subject, html_body, text_body)

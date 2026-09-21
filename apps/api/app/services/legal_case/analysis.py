@@ -30,8 +30,10 @@ from app.models.legal_case import (
     CaseDocumentRelation,
     LegalCase,
 )
+from app.services.ai.alerts import notify_admin_of_provider_failure
 from app.services.ai.base import AIProvider
 from app.services.ai.case_extraction_schema import CaseConflictDetectionResult, DocumentRelationshipResult
+from app.services.ai.errors import AIProviderCallError
 from app.services.ai.json_schemas import CASE_CONFLICT_DETECTION_SCHEMA, CHAT_ANSWER_SCHEMA, DOCUMENT_RELATIONSHIP_SCHEMA
 from app.services.ai.router import AIRoutingBlockedError, get_ai_provider_for_document
 from app.services.ai.schema import AIOutputValidationError
@@ -165,6 +167,12 @@ TOPEC의 소송상 지위: {case.topec_position or "미지정"}
         run.error_message = str(exc)
         db.commit()
         raise CaseAnalysisError(f"AI 응답 처리에 실패했습니다: {exc}") from exc
+    except AIProviderCallError as exc:
+        run.status = "FAILED"
+        run.error_message = exc.detail or exc.user_message
+        db.commit()
+        notify_admin_of_provider_failure(exc)
+        raise CaseAnalysisError(exc.user_message) from exc
 
     db.add(
         AIUsageLog(
