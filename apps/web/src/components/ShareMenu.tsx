@@ -89,7 +89,7 @@ export function ShareMenu({ title, text, onDownloadWord, onDownloadPdf }: ShareM
         ref={buttonRef}
         type="button"
         onClick={toggle}
-        className="inline-flex items-center gap-1 rounded border border-slate-300 bg-white px-2 py-1 text-xs text-slate-600 hover:bg-slate-50"
+        className="inline-flex items-center gap-1 rounded border border-ink-300 bg-white px-2 py-1 text-xs text-ink-600 hover:bg-ink-50"
       >
         🔗 공유하기
       </button>
@@ -98,7 +98,7 @@ export function ShareMenu({ title, text, onDownloadWord, onDownloadPdf }: ShareM
         typeof document !== "undefined" &&
         createPortal(
           <div
-            className="fixed z-50 whitespace-nowrap rounded bg-slate-800 px-2 py-1 text-xs text-white"
+            className="fixed z-50 whitespace-nowrap rounded bg-ink-800 px-2 py-1 text-xs text-white"
             style={{ top: feedbackPos.top, left: feedbackPos.left }}
           >
             {feedback}
@@ -112,7 +112,7 @@ export function ShareMenu({ title, text, onDownloadWord, onDownloadPdf }: ShareM
           <>
             <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
             <div
-              className="fixed z-50 w-52 rounded border border-slate-200 bg-white py-1 shadow-lg"
+              className="card fixed z-50 w-52 py-1 shadow-pop"
               style={{ top: menuPos.top, left: menuPos.left }}
             >
               <MenuItem onClick={copyText}>📋 텍스트 복사</MenuItem>
@@ -144,7 +144,7 @@ function MenuItem({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent"
+      className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-ink-700 hover:bg-ink-50 disabled:cursor-not-allowed disabled:text-ink-300 disabled:hover:bg-transparent"
     >
       {children}
     </button>

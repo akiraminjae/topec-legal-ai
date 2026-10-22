@@ -3,11 +3,21 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { AlertCircle, FileText, Loader2, Plus, Search, SlidersHorizontal, Trash2 } from "lucide-react";
 import { api, extractErrorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { DocumentOut } from "@/lib/types";
 import { RiskBadge, StatusBadge } from "@/components/Badges";
+import { Card, EmptyState, Notice, PageHeader, Table } from "@/components/ui";
 import { CONTRACT_TYPE_LABELS, documentTypeLabel } from "@/lib/labels";
+
+const RISK_OPTIONS = [
+  { value: "CRITICAL", label: "매우 높음" },
+  { value: "HIGH", label: "높음" },
+  { value: "MEDIUM", label: "보통" },
+  { value: "LOW", label: "낮음" },
+  { value: "ACCEPTABLE", label: "적정" },
+];
 
 export default function DocumentsPage() {
   const [search, setSearch] = useState("");
@@ -29,6 +39,8 @@ export default function DocumentsPage() {
     },
   });
 
+  const filtered = search || contractType || riskLevel;
+
   async function handleDelete(id: string) {
     if (!confirm("이 문서를 삭제하시겠습니까? 삭제된 문서는 복구할 수 없습니다.")) return;
     setError(null);
@@ -44,103 +56,153 @@ export default function DocumentsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-slate-800">내 문서</h1>
-        <Link href="/documents/new" className="rounded bg-brand-600 px-3 py-1.5 text-sm text-white hover:bg-brand-700">
-          + 계약서 업로드
-        </Link>
-      </div>
+    <>
+      <PageHeader
+        title="내 문서"
+        description="내가 업로드한 계약서와 소송·분쟁 문서입니다."
+        actions={
+          <Link href="/documents/new" className="btn-primary">
+            <Plus className="h-4 w-4" strokeWidth={2.4} />
+            계약서 업로드
+          </Link>
+        }
+      />
 
-      <div className="flex flex-wrap gap-2 rounded border border-slate-200 bg-white p-3">
-        <input
-          className="rounded border border-slate-300 px-3 py-1.5 text-sm"
-          placeholder="계약명 검색"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <select
-          className="rounded border border-slate-300 px-3 py-1.5 text-sm"
-          value={contractType}
-          onChange={(e) => setContractType(e.target.value)}
-        >
-          <option value="">전체 계약유형</option>
-          {Object.entries(CONTRACT_TYPE_LABELS).map(([k, v]) => (
-            <option key={k} value={k}>
-              {v}
-            </option>
-          ))}
-        </select>
-        <select
-          className="rounded border border-slate-300 px-3 py-1.5 text-sm"
-          value={riskLevel}
-          onChange={(e) => setRiskLevel(e.target.value)}
-        >
-          <option value="">전체 위험등급</option>
-          <option value="CRITICAL">매우 높음</option>
-          <option value="HIGH">높음</option>
-          <option value="MEDIUM">보통</option>
-          <option value="LOW">낮음</option>
-          <option value="ACCEPTABLE">적정</option>
-        </select>
-      </div>
+      <Card className="p-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative min-w-[14rem] flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" strokeWidth={2} />
+            <input
+              className="input h-9 pl-9"
+              placeholder="계약명 검색"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <select className="input h-9 w-auto" value={contractType} onChange={(e) => setContractType(e.target.value)}>
+            <option value="">전체 계약유형</option>
+            {Object.entries(CONTRACT_TYPE_LABELS).map(([k, v]) => (
+              <option key={k} value={k}>
+                {v}
+              </option>
+            ))}
+          </select>
+          <select className="input h-9 w-auto" value={riskLevel} onChange={(e) => setRiskLevel(e.target.value)}>
+            <option value="">전체 위험등급</option>
+            {RISK_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+          {filtered && (
+            <button
+              onClick={() => {
+                setSearch("");
+                setContractType("");
+                setRiskLevel("");
+              }}
+              className="btn-ghost btn-sm"
+            >
+              조건 초기화
+            </button>
+          )}
+          {!isLoading && (
+            <span className="ml-auto whitespace-nowrap pr-1 text-sm tabular text-ink-500">총 {documents.length}건</span>
+          )}
+        </div>
+      </Card>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && (
+        <Notice tone="danger" icon={AlertCircle}>
+          {error}
+        </Notice>
+      )}
 
-      <div className="rounded border border-slate-200 bg-white">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-slate-200 text-left text-slate-500">
-              <th className="p-3">계약명</th>
-              <th>유형</th>
-              <th>상대방</th>
-              <th>부서</th>
-              <th>상태</th>
-              <th>위험등급</th>
-              <th>등록일</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {documents.map((d) => {
-              const canManage = user?.id === d.owner_id || hasRole("SYSTEM_ADMIN");
-              return (
-                <tr key={d.id} className="border-b border-slate-100 hover:bg-slate-50">
-                  <td className="p-3">
-                    <Link href={`/documents/${d.id}`} className="text-brand-700 hover:underline">
-                      {d.title}
-                    </Link>
-                  </td>
-                  <td>{documentTypeLabel(d)}</td>
-                  <td>{d.counterparty_name || "-"}</td>
-                  <td>{d.department || "-"}</td>
-                  <td><StatusBadge status={d.status} /></td>
-                  <td><RiskBadge level={d.overall_risk_level} /></td>
-                  <td className="text-slate-500">{new Date(d.created_at).toLocaleDateString("ko-KR")}</td>
-                  <td>
-                    {canManage && (
-                      <button
-                        onClick={() => handleDelete(d.id)}
-                        disabled={deletingId === d.id}
-                        className="rounded border border-red-300 px-2 py-1 text-xs text-red-600 hover:bg-red-50 disabled:opacity-50"
-                      >
-                        삭제
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-            {!isLoading && documents.length === 0 && (
+      <Card>
+        {isLoading ? (
+          <EmptyState icon={Loader2} title="문서를 불러오는 중입니다." compact />
+        ) : documents.length === 0 ? (
+          <EmptyState
+            icon={filtered ? SlidersHorizontal : FileText}
+            title={filtered ? "조건에 맞는 문서가 없습니다." : "아직 등록된 문서가 없습니다."}
+            description={
+              filtered
+                ? "검색어나 필터를 바꿔 다시 찾아보세요."
+                : "계약서나 소송·분쟁 문서를 업로드하면 AI가 1차 검토를 시작합니다."
+            }
+            action={
+              !filtered && (
+                <Link href="/documents/new" className="btn-primary">
+                  <Plus className="h-4 w-4" strokeWidth={2.4} />
+                  계약서 업로드
+                </Link>
+              )
+            }
+          />
+        ) : (
+          <Table>
+            <thead>
               <tr>
-                <td colSpan={8} className="py-6 text-center text-slate-400">
-                  조건에 맞는 문서가 없습니다.
-                </td>
+                <th>계약명</th>
+                <th>유형</th>
+                <th>상대방</th>
+                <th>부서</th>
+                <th>상태</th>
+                <th>위험등급</th>
+                <th className="text-right">등록일</th>
+                <th className="w-px" />
               </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
+            </thead>
+            <tbody>
+              {documents.map((d) => {
+                const canManage = user?.id === d.owner_id || hasRole("SYSTEM_ADMIN");
+                return (
+                  <tr key={d.id} className="group">
+                    <td className="max-w-[24rem]">
+                      <Link
+                        href={`/documents/${d.id}`}
+                        className="font-medium text-ink-900 hover:text-brand-700 hover:underline"
+                      >
+                        {d.title}
+                      </Link>
+                    </td>
+                    <td className="text-ink-500">{documentTypeLabel(d)}</td>
+                    <td>{d.counterparty_name || <span className="text-ink-400">-</span>}</td>
+                    <td>{d.department || <span className="text-ink-400">-</span>}</td>
+                    <td>
+                      <StatusBadge status={d.status} />
+                    </td>
+                    <td>
+                      <RiskBadge level={d.overall_risk_level} />
+                    </td>
+                    <td className="whitespace-nowrap text-right text-ink-500">
+                      {new Date(d.created_at).toLocaleDateString("ko-KR")}
+                    </td>
+                    <td className="pr-3">
+                      {canManage && (
+                        <button
+                          onClick={() => handleDelete(d.id)}
+                          disabled={deletingId === d.id}
+                          title="문서 삭제"
+                          aria-label={`${d.title} 삭제`}
+                          className="rounded-md p-1.5 text-ink-400 opacity-0 transition hover:bg-red-50 hover:text-red-600 focus-visible:opacity-100 group-hover:opacity-100 disabled:opacity-50"
+                        >
+                          {deletingId === d.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" strokeWidth={2} />
+                          )}
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </Table>
+        )}
+      </Card>
+    </>
   );
 }

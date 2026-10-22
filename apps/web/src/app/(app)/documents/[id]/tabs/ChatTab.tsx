@@ -100,23 +100,23 @@ export function ChatTab({ documentId }: { documentId: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded border border-slate-200 bg-white p-4">
+    <div className="flex flex-col gap-3 card p-5">
       <div className="flex flex-wrap gap-2">
         {SUGGESTED_QUESTIONS.map((q) => (
           <button
             key={q}
             disabled={sending}
             onClick={() => send(q)}
-            className="rounded-full border border-slate-300 px-3 py-1 text-xs text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+            className="rounded-full border border-ink-300 px-3 py-1 text-xs text-ink-600 hover:bg-ink-50 disabled:opacity-50"
           >
             {q}
           </button>
         ))}
       </div>
 
-      <div className="flex max-h-[500px] flex-col gap-3 overflow-y-auto rounded border border-slate-100 p-3">
+      <div className="flex max-h-[500px] flex-col gap-3 overflow-y-auto rounded border border-ink-100 p-3">
         {messages.length === 0 && !sending && (
-          <p className="text-sm text-slate-400">계약서에 대해 궁금한 점을 질문해 보세요.</p>
+          <p className="text-sm text-ink-400">계약서에 대해 궁금한 점을 질문해 보세요.</p>
         )}
         {messages.map((m) => (
           <div key={m.id} className={m.role === "user" ? "self-end" : "self-start"}>
@@ -173,7 +173,7 @@ function ThinkingIndicator({ progress }: { progress: number }) {
 function AssistantAnswer({ message }: { message: ChatMessageOut }) {
   const structured = message.structured_answer as Record<string, unknown> | null;
   if (!structured) {
-    return <div className="max-w-3xl rounded bg-slate-100 px-3 py-2 text-sm text-slate-700">{message.content}</div>;
+    return <div className="max-w-3xl rounded bg-ink-100 px-3 py-2 text-sm text-ink-700">{message.content}</div>;
   }
   const isMock = structured.is_mock as boolean;
   const aiProvider = structured.ai_provider as string | undefined;
@@ -191,7 +191,7 @@ function AssistantAnswer({ message }: { message: ChatMessageOut }) {
     .join("\n\n");
 
   return (
-    <div className="max-w-3xl rounded border border-slate-200 bg-white p-3 text-sm">
+    <div className="max-w-3xl card p-4 text-sm">
       <div className="mb-2 flex items-center justify-between gap-2">
         <AIProviderBadge provider={aiProvider} isMock={isMock} />
         <ShareMenu title="AI 질의응답 답변" text={shareText} />
@@ -203,7 +203,7 @@ function AssistantAnswer({ message }: { message: ChatMessageOut }) {
       <Field label="관련 법령·판례·내부자료" value={structured.legal_sources as string} />
       <Field label="권고 대응방안" value={structured.recommended_action as string} />
       {!!structured.recommended_wording && <Field label="수정 권고문구" value={structured.recommended_wording as string} />}
-      <p className="mt-2 text-xs text-slate-400">
+      <p className="mt-2 text-xs text-ink-400">
         신뢰도 {structured.confidence as number}% · 법무검토 필요: {structured.legal_review_required ? "예" : "아니오"}
       </p>
     </div>
@@ -214,8 +214,8 @@ function Field({ label, value }: { label: string; value: string }) {
   if (!value) return null;
   return (
     <div className="mb-1.5">
-      <p className="text-xs font-medium text-slate-500">{label}</p>
-      <p className="whitespace-pre-wrap text-slate-700">{value}</p>
+      <p className="text-xs font-medium text-ink-500">{label}</p>
+      <p className="whitespace-pre-wrap text-ink-700">{value}</p>
     </div>
   );
 }

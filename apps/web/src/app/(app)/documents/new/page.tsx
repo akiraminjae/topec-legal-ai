@@ -125,8 +125,8 @@ export default function NewDocumentPage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <h1 className="mb-4 text-xl font-bold text-slate-800">문서 업로드</h1>
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 rounded border border-slate-200 bg-white p-6">
+      <h1 className="mb-4 text-xl font-bold text-ink-800">문서 업로드</h1>
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 card p-6">
         <Field label="검토 종류">
           <select className="input" {...register("document_category")}>
             {Object.entries(DOCUMENT_CATEGORY_LABELS).map(([k, v]) => (
@@ -250,7 +250,7 @@ export default function NewDocumentPage() {
               e.target.value = "";
             }}
           />
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="mt-1 text-xs text-ink-400">
             여러 파일을 한 번에 선택하거나, 선택창을 다시 열어 추가로 첨부할 수 있습니다. AI 분석은
             첨부한 모든 파일의 내용을 통합하여 수행되며, 첫 번째 파일이 주 파일(분석 기준)로 사용됩니다.
           </p>
@@ -260,7 +260,7 @@ export default function NewDocumentPage() {
               {files.map((f, i) => (
                 <li
                   key={`${f.name}-${f.size}-${i}`}
-                  className="flex items-center justify-between rounded border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs"
+                  className="flex items-center justify-between rounded border border-ink-200 bg-ink-50 px-3 py-1.5 text-xs"
                 >
                   <span className="truncate">
                     {i === 0 && (
@@ -269,12 +269,12 @@ export default function NewDocumentPage() {
                       </span>
                     )}
                     {f.name}
-                    <span className="ml-2 text-slate-400">({(f.size / 1024).toFixed(0)}KB)</span>
+                    <span className="ml-2 text-ink-400">({(f.size / 1024).toFixed(0)}KB)</span>
                   </span>
                   <button
                     type="button"
                     onClick={() => removeFile(i)}
-                    className="ml-2 shrink-0 text-slate-400 hover:text-red-600"
+                    className="ml-2 shrink-0 text-ink-400 hover:text-red-600"
                   >
                     제거
                   </button>
@@ -301,7 +301,7 @@ export default function NewDocumentPage() {
 function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="mb-1 block text-sm text-slate-600">{label}</label>
+      <label className="mb-1 block text-sm text-ink-600">{label}</label>
       {children}
       {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
     </div>

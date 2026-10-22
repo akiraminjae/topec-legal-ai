@@ -49,9 +49,9 @@ export function CaseReportsTab({ caseId }: { caseId: string }) {
         1차 초안이며, 담당 변호사·법무담당자의 검토 없이 그대로 제출해서는 안 됩니다.
       </div>
 
-      <div className="rounded border border-slate-200 bg-white p-4">
-        <h3 className="mb-3 font-semibold text-slate-700">대응문서 초안 생성</h3>
-        <label className="mb-1 block text-sm text-slate-600">담당자 지정 작성지침 (선택)</label>
+      <div className="card p-5">
+        <h3 className="mb-3 font-semibold text-ink-700">대응문서 초안 생성</h3>
+        <label className="mb-1 block text-sm text-ink-600">담당자 지정 작성지침 (선택)</label>
         <textarea
           className="input mb-3"
           rows={3}
@@ -73,11 +73,11 @@ export function CaseReportsTab({ caseId }: { caseId: string }) {
         {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
       </div>
 
-      <div className="rounded border border-slate-200 bg-white p-4">
-        <h3 className="mb-3 font-semibold text-slate-700">생성된 문서</h3>
+      <div className="card p-5">
+        <h3 className="mb-3 font-semibold text-ink-700">생성된 문서</h3>
         <ul className="flex flex-col gap-1 text-sm">
           {reports.map((r) => (
-            <li key={r.id} className="flex items-center justify-between rounded border border-slate-100 px-3 py-1.5">
+            <li key={r.id} className="flex items-center justify-between rounded-md border border-ink-100 px-3 py-2">
               <span>
                 {CASE_REPORT_TYPE_LABELS[r.report_type] || r.report_type} ({r.format})
                 {r.pdf_conversion_failed && <span className="ml-2 text-xs text-amber-600">PDF 변환 실패 → DOCX 제공</span>}
@@ -87,7 +87,7 @@ export function CaseReportsTab({ caseId }: { caseId: string }) {
               </button>
             </li>
           ))}
-          {reports.length === 0 && <li className="text-slate-400">생성된 문서가 없습니다.</li>}
+          {reports.length === 0 && <li className="text-ink-400">생성된 문서가 없습니다.</li>}
         </ul>
       </div>
     </div>

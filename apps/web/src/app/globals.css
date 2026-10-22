@@ -2,22 +2,119 @@
 @tailwind components;
 @tailwind utilities;
 
-html,
-body {
-  padding: 0;
-  margin: 0;
-  background-color: #f8fafc;
-  color: #0f172a;
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-ink-100 font-sans text-base text-ink-800 antialiased;
+    /* 한글 본문 가독성: 자간을 살짝 좁히고 금칙 처리를 단어 단위로 */
+    letter-spacing: -0.01em;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+
+  /* 숫자가 섞인 표·지표에서 자릿수가 흔들리지 않도록 */
+  table,
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand-400 ring-offset-1 ring-offset-white;
+  }
+
+  ::selection {
+    @apply bg-brand-100 text-brand-900;
+  }
 }
 
-.input {
-  @apply w-full rounded border border-slate-300 px-3 py-2 text-sm;
-}
+@layer components {
+  /* ---- 입력 ---- */
+  .input {
+    @apply w-full rounded-md border border-ink-300 bg-white px-3 py-2 text-base text-ink-800
+      placeholder:text-ink-400 transition-colors
+      hover:border-ink-400
+      focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20
+      disabled:cursor-not-allowed disabled:bg-ink-100 disabled:text-ink-400;
+  }
 
-.btn-secondary {
-  @apply rounded border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-50;
-}
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-ink-700;
+  }
 
-.btn-primary {
-  @apply rounded bg-brand-600 px-3 py-1.5 text-sm text-white hover:bg-brand-700 disabled:opacity-50;
+  .hint {
+    @apply mt-1.5 text-xs leading-relaxed text-ink-500;
+  }
+
+  /* ---- 버튼 ----
+     높이(h-9)를 공유해 입력창·버튼이 한 줄에서 어긋나지 않게 한다. */
+  .btn {
+    @apply inline-flex h-9 select-none items-center justify-center gap-1.5 whitespace-nowrap
+      rounded-md px-3.5 text-sm font-medium transition-colors
+      disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-primary {
+    @apply btn bg-brand-700 text-white shadow-sm hover:bg-brand-800 active:bg-brand-900;
+  }
+
+  .btn-secondary {
+    @apply btn border border-ink-300 bg-white text-ink-700 shadow-sm hover:border-ink-400 hover:bg-ink-50 active:bg-ink-100;
+  }
+
+  .btn-ghost {
+    @apply btn text-ink-600 hover:bg-ink-200/60 hover:text-ink-900;
+  }
+
+  .btn-danger {
+    @apply btn bg-red-600 text-white shadow-sm hover:bg-red-700 active:bg-red-800;
+  }
+
+  .btn-sm {
+    @apply h-8 px-3 text-xs;
+  }
+
+  /* ---- 표면 ---- */
+  .card {
+    @apply rounded-lg border border-ink-200 bg-white shadow-card;
+  }
+
+  .card-pad {
+    @apply card p-5;
+  }
+
+  /* ---- 표 ----
+     헤더는 고정, 행은 hover 로 짚어가며 읽을 수 있게. */
+  .table-wrap {
+    @apply overflow-x-auto;
+  }
+
+  .table {
+    @apply w-full border-collapse text-sm;
+  }
+
+  .table thead th {
+    @apply whitespace-nowrap border-b border-ink-200 bg-ink-50 px-4 py-2.5 text-left
+      text-xs font-semibold uppercase tracking-wide text-ink-500;
+  }
+
+  .table tbody td {
+    @apply border-b border-ink-100 px-4 py-3 align-middle text-ink-700;
+  }
+
+  .table tbody tr {
+    @apply transition-colors hover:bg-brand-50/40;
+  }
+
+  .table tbody tr:last-child td {
+    @apply border-b-0;
+  }
+
+  /* ---- 배지 ---- */
+  .badge {
+    @apply inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2.5 py-0.5
+      text-xs font-medium leading-5;
+  }
 }

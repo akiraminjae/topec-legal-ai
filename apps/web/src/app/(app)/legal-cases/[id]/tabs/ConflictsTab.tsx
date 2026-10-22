@@ -9,7 +9,7 @@ import { CONFLICT_SEVERITY_LABELS } from "@/lib/labels";
 const SEVERITY_COLOR: Record<string, string> = {
   HIGH: "border-red-300 bg-red-50 text-red-700",
   MEDIUM: "border-amber-300 bg-amber-50 text-amber-700",
-  LOW: "border-slate-300 bg-slate-50 text-slate-600",
+  LOW: "border-ink-300 bg-ink-50 text-ink-600",
 };
 
 export function ConflictsTab({ caseId }: { caseId: string }) {
@@ -28,15 +28,15 @@ export function ConflictsTab({ caseId }: { caseId: string }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="rounded border border-slate-200 bg-white p-3 text-xs text-slate-500">
+      <div className="card p-4 text-xs text-ink-500">
         &quot;사건 통합분석&quot; 탭에서 통합분석을 실행하면 문서 간 금액·일자·당사자·사실관계 불일치도
         함께 탐지됩니다. 확인 후 해결 처리할 수 있습니다.
-        {conflicts.length > 0 && <span className="ml-1 font-medium text-slate-700">(미해결 {openCount}건)</span>}
+        {conflicts.length > 0 && <span className="ml-1 font-medium text-ink-700">(미해결 {openCount}건)</span>}
       </div>
 
-      {isLoading && <p className="text-slate-400">불러오는 중...</p>}
+      {isLoading && <p className="text-ink-400">불러오는 중...</p>}
       {!isLoading && conflicts.length === 0 && (
-        <div className="rounded border border-slate-200 bg-white p-6 text-center text-slate-400">
+        <div className="card p-6 text-center text-ink-400">
           탐지된 불일치가 없습니다.
         </div>
       )}
@@ -49,11 +49,11 @@ export function ConflictsTab({ caseId }: { caseId: string }) {
                 <span className={`rounded-full border px-2 py-0.5 text-xs ${SEVERITY_COLOR[c.severity] || SEVERITY_COLOR.LOW}`}>
                   {CONFLICT_SEVERITY_LABELS[c.severity] || c.severity}
                 </span>
-                <span className="font-medium text-slate-700">{c.conflict_type}</span>
-                <span className="text-xs text-slate-400">신뢰도 {c.confidence}%</span>
+                <span className="font-medium text-ink-700">{c.conflict_type}</span>
+                <span className="text-xs text-ink-400">신뢰도 {c.confidence}%</span>
               </div>
               {c.resolution_status === "RESOLVED" ? (
-                <button onClick={() => updateStatus(c.id, "OPEN")} className="text-xs text-slate-500 hover:underline">
+                <button onClick={() => updateStatus(c.id, "OPEN")} className="text-xs text-ink-500 hover:underline">
                   다시 열기
                 </button>
               ) : (
@@ -62,10 +62,10 @@ export function ConflictsTab({ caseId }: { caseId: string }) {
                 </button>
               )}
             </div>
-            <p className="mb-2 text-slate-600">{c.summary}</p>
+            <p className="mb-2 text-ink-600">{c.summary}</p>
             <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-              <div className="rounded bg-slate-50 p-2">
-                <p className="text-xs text-slate-400">
+              <div className="rounded bg-ink-50 p-2">
+                <p className="text-xs text-ink-400">
                   {c.source_document_a_id ? (
                     <Link href={`/documents/${c.source_document_a_id}`} className="text-brand-700 hover:underline">
                       {c.source_document_a_title}
@@ -74,10 +74,10 @@ export function ConflictsTab({ caseId }: { caseId: string }) {
                     "출처 미상"
                   )}
                 </p>
-                <p className="text-slate-700">{c.value_a}</p>
+                <p className="text-ink-700">{c.value_a}</p>
               </div>
-              <div className="rounded bg-slate-50 p-2">
-                <p className="text-xs text-slate-400">
+              <div className="rounded bg-ink-50 p-2">
+                <p className="text-xs text-ink-400">
                   {c.source_document_b_id ? (
                     <Link href={`/documents/${c.source_document_b_id}`} className="text-brand-700 hover:underline">
                       {c.source_document_b_title}
@@ -86,11 +86,11 @@ export function ConflictsTab({ caseId }: { caseId: string }) {
                     "출처 미상"
                   )}
                 </p>
-                <p className="text-slate-700">{c.value_b}</p>
+                <p className="text-ink-700">{c.value_b}</p>
               </div>
             </div>
-            {c.impact && <p className="mt-2 text-xs text-slate-500">TOPEC에 미치는 영향: {c.impact}</p>}
-            {c.recommended_check && <p className="mt-1 text-xs text-slate-500">확인 필요: {c.recommended_check}</p>}
+            {c.impact && <p className="mt-2 text-xs text-ink-500">TOPEC에 미치는 영향: {c.impact}</p>}
+            {c.recommended_check && <p className="mt-1 text-xs text-ink-500">확인 필요: {c.recommended_check}</p>}
           </li>
         ))}
       </ul>

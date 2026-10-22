@@ -61,11 +61,11 @@ export default function KnowledgePage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-xl font-bold text-slate-800">법률지식 관리</h1>
+      <h1 className="text-xl font-bold text-ink-800">법률지식 관리</h1>
 
-      <form onSubmit={upload} className="flex flex-wrap items-end gap-2 rounded border border-slate-200 bg-white p-4">
+      <form onSubmit={upload} className="flex flex-wrap items-end gap-2 card p-5">
         <div>
-          <label className="mb-1 block text-xs text-slate-500">자료유형</label>
+          <label className="mb-1 block text-xs text-ink-500">자료유형</label>
           <select className="input" value={docType} onChange={(e) => setDocType(e.target.value)}>
             {Object.entries(DOC_TYPE_LABELS).map(([k, v]) => (
               <option key={k} value={k}>
@@ -75,11 +75,11 @@ export default function KnowledgePage() {
           </select>
         </div>
         <div className="flex-1">
-          <label className="mb-1 block text-xs text-slate-500">제목</label>
+          <label className="mb-1 block text-xs text-ink-500">제목</label>
           <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-slate-500">파일 (PDF/DOCX/TXT/HWPX)</label>
+          <label className="mb-1 block text-xs text-ink-500">파일 (PDF/DOCX/TXT/HWPX)</label>
           <input type="file" accept=".pdf,.docx,.txt,.hwpx" onChange={(e) => setFile(e.target.files?.[0] || null)} />
         </div>
         <button disabled={uploading} className="btn-primary">
@@ -88,10 +88,10 @@ export default function KnowledgePage() {
       </form>
       {error && <p className="text-sm text-red-600">{error}</p>}
 
-      <div className="rounded border border-slate-200 bg-white">
+      <div className="card">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-slate-200 text-left text-slate-500">
+            <tr className="border-b border-ink-200 text-left text-ink-500">
               <th className="p-3">제목</th>
               <th>유형</th>
               <th>출처</th>
@@ -100,7 +100,7 @@ export default function KnowledgePage() {
           </thead>
           <tbody>
             {documents.map((d) => (
-              <tr key={d.id} className="border-b border-slate-100">
+              <tr key={d.id} className="border-b border-ink-100">
                 <td className="p-3">{d.title}</td>
                 <td>{DOC_TYPE_LABELS[d.doc_type] || d.doc_type}</td>
                 <td>{d.source || "-"}</td>
@@ -109,7 +109,7 @@ export default function KnowledgePage() {
             ))}
             {documents.length === 0 && (
               <tr>
-                <td colSpan={4} className="py-6 text-center text-slate-400">
+                <td colSpan={4} className="py-6 text-center text-ink-400">
                   등록된 지식자료가 없습니다.
                 </td>
               </tr>

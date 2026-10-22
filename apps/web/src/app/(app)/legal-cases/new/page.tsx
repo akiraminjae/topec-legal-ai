@@ -71,8 +71,8 @@ export default function NewLegalCasePage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <h1 className="mb-4 text-xl font-bold text-slate-800">새 사건 등록</h1>
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 rounded border border-slate-200 bg-white p-6">
+      <h1 className="mb-4 text-xl font-bold text-ink-800">새 사건 등록</h1>
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 card p-6">
         <Field label="사건명">
           <input className="input" {...register("case_name")} required placeholder="예: OO공사 공사대금 청구소송" />
         </Field>
@@ -181,7 +181,7 @@ export default function NewLegalCasePage() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="mb-1 block text-sm text-slate-600">{label}</label>
+      <label className="mb-1 block text-sm text-ink-600">{label}</label>
       {children}
     </div>
   );

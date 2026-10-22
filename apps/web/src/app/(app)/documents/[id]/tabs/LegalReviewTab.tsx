@@ -30,9 +30,9 @@ export function LegalReviewTab({ documentId, document }: { documentId: string; d
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="rounded border border-slate-200 bg-white p-4">
-        <h3 className="mb-2 font-semibold text-slate-700">법무검토 요청</h3>
-        <p className="mb-3 text-sm text-slate-500">
+      <div className="card p-5">
+        <h3 className="mb-2 font-semibold text-ink-700">법무검토 요청</h3>
+        <p className="mb-3 text-sm text-ink-500">
           현재 문서 상태: <strong>{document.status}</strong> · 법무검토 필요:{" "}
           <strong>{document.legal_review_required ? "예" : "아니오"}</strong>
         </p>
@@ -50,7 +50,7 @@ export function LegalReviewTab({ documentId, document }: { documentId: string; d
       </div>
 
       {isLegalReviewer && (
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-ink-500">
           법무담당자는 <strong>법무 검토함</strong> 메뉴에서 배정된 요청을 확인하고 검토의견을 작성할 수 있습니다.
         </p>
       )}

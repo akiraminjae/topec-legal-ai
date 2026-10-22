@@ -97,14 +97,14 @@ export function CaseChatTab({ caseId }: { caseId: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded border border-slate-200 bg-white p-4">
+    <div className="flex flex-col gap-3 card p-5">
       <div className="flex items-center gap-3">
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-600 ring-1 ring-brand-200">
           <LegalRobotIcon className="h-7 w-7" />
         </span>
         <div>
-          <h3 className="text-sm font-semibold text-slate-700">사건 AI 질의응답</h3>
-          <p className="text-xs text-slate-500">
+          <h3 className="text-sm font-semibold text-ink-700">사건 AI 질의응답</h3>
+          <p className="text-xs text-ink-500">
             이 질의응답은 <strong>이 사건에 업로드된 문서에서만</strong> 근거를 찾습니다. 다른 사건의 자료는
             검색되지 않습니다.
           </p>
@@ -116,18 +116,18 @@ export function CaseChatTab({ caseId }: { caseId: string }) {
             key={q}
             disabled={sending}
             onClick={() => send(q)}
-            className="rounded-full border border-slate-300 px-3 py-1 text-xs text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+            className="rounded-full border border-ink-300 px-3 py-1 text-xs text-ink-600 hover:bg-ink-50 disabled:opacity-50"
           >
             {q}
           </button>
         ))}
       </div>
 
-      <div className="flex max-h-[500px] flex-col gap-3 overflow-y-auto rounded border border-slate-100 p-3">
+      <div className="flex max-h-[500px] flex-col gap-3 overflow-y-auto rounded border border-ink-100 p-3">
         {messages.length === 0 && !sending && (
-          <div className="flex flex-col items-center gap-2 py-8 text-slate-300">
+          <div className="flex flex-col items-center gap-2 py-8 text-ink-300">
             <LegalRobotIcon className="h-16 w-16" />
-            <p className="text-sm text-slate-400">사건 자료에 대해 궁금한 점을 질문해 보세요.</p>
+            <p className="text-sm text-ink-400">사건 자료에 대해 궁금한 점을 질문해 보세요.</p>
           </div>
         )}
         {messages.map((m) => (
@@ -192,7 +192,7 @@ function ThinkingIndicator({ progress }: { progress: number }) {
 function CaseAssistantAnswer({ message }: { message: CaseChatMessageOut }) {
   const structured = message.structured_answer as Record<string, unknown> | null;
   if (!structured) {
-    return <div className="max-w-3xl rounded bg-slate-100 px-3 py-2 text-sm text-slate-700">{message.content}</div>;
+    return <div className="max-w-3xl rounded bg-ink-100 px-3 py-2 text-sm text-ink-700">{message.content}</div>;
   }
   const isMock = structured.is_mock as boolean;
   const aiProvider = structured.ai_provider as string | undefined;
@@ -209,7 +209,7 @@ function CaseAssistantAnswer({ message }: { message: CaseChatMessageOut }) {
     .join("\n\n");
 
   return (
-    <div className="max-w-3xl rounded border border-slate-200 bg-white p-3 text-sm">
+    <div className="max-w-3xl card p-4 text-sm">
       <div className="mb-2 flex items-center justify-between gap-2">
         <AIProviderBadge provider={aiProvider} isMock={isMock} />
         <ShareMenu title="사건 AI 질의응답 답변" text={shareText} />
@@ -220,7 +220,7 @@ function CaseAssistantAnswer({ message }: { message: CaseChatMessageOut }) {
       <Field label="TOPEC에 미치는 영향" value={structured.impact_on_topec as string} />
       <Field label="관련 법령·판례·내부자료" value={structured.legal_sources as string} />
       <Field label="권고 대응방안" value={structured.recommended_action as string} />
-      <p className="mt-2 text-xs text-slate-400">
+      <p className="mt-2 text-xs text-ink-400">
         신뢰도 {structured.confidence as number}% · 법무검토 필요: {structured.legal_review_required ? "예" : "아니오"}
       </p>
     </div>
@@ -231,8 +231,8 @@ function Field({ label, value }: { label: string; value: string }) {
   if (!value) return null;
   return (
     <div className="mb-1.5">
-      <p className="text-xs font-medium text-slate-500">{label}</p>
-      <p className="whitespace-pre-wrap text-slate-700">{value}</p>
+      <p className="text-xs font-medium text-ink-500">{label}</p>
+      <p className="whitespace-pre-wrap text-ink-700">{value}</p>
     </div>
   );
 }

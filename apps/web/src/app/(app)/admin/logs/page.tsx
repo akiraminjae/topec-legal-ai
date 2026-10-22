@@ -11,8 +11,8 @@ export default function AdminLogsPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-xl font-bold text-slate-800">로그 기록</h1>
-      <div className="flex gap-1 border-b border-slate-200">
+      <h1 className="text-xl font-bold text-ink-800">로그 기록</h1>
+      <div className="flex gap-1 border-b border-ink-200">
         <TabButton active={tab === "audit"} onClick={() => setTab("audit")} label="감사 로그" />
         <TabButton active={tab === "login"} onClick={() => setTab("login")} label="로그인 시도 이력" />
       </div>
@@ -26,7 +26,7 @@ function TabButton({ active, onClick, label }: { active: boolean; onClick: () =>
   return (
     <button
       onClick={onClick}
-      className={`px-4 py-2 text-sm font-medium ${active ? "border-b-2 border-brand-600 text-brand-700" : "text-slate-500"}`}
+      className={`px-4 py-2 text-sm font-medium ${active ? "border-b-2 border-brand-600 text-brand-700" : "text-ink-500"}`}
     >
       {label}
     </button>
@@ -64,10 +64,10 @@ function AuditLogPanel() {
           <option value="false">실패만</option>
         </select>
       </div>
-      <div className="overflow-x-auto rounded border border-slate-200 bg-white">
+      <div className="overflow-x-auto card">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-slate-200 text-left text-slate-500">
+            <tr className="border-b border-ink-200 text-left text-ink-500">
               <th className="p-3">시각</th>
               <th>사용자</th>
               <th>동작</th>
@@ -79,7 +79,7 @@ function AuditLogPanel() {
           </thead>
           <tbody>
             {data.map((log) => (
-              <tr key={log.id} className="border-b border-slate-100 align-top">
+              <tr key={log.id} className="border-b border-ink-100 align-top">
                 <td className="whitespace-nowrap p-3">{new Date(log.created_at).toLocaleString("ko-KR")}</td>
                 <td>{log.user_name || "-"}</td>
                 <td>{AUDIT_ACTION_LABELS[log.action] || log.action}</td>
@@ -88,17 +88,17 @@ function AuditLogPanel() {
                   {log.target_id ? ` (${log.target_id.slice(0, 8)})` : ""}
                 </td>
                 <td>
-                  <span className={log.success ? "text-green-600" : "text-red-600"}>
+                  <span className={log.success ? "text-emerald-600" : "text-red-600"}>
                     {log.success ? "성공" : "실패"}
                   </span>
                 </td>
                 <td>{log.ip_address || "-"}</td>
-                <td className="max-w-[240px] truncate text-slate-500">{log.failure_reason || log.change_summary || "-"}</td>
+                <td className="max-w-[240px] truncate text-ink-500">{log.failure_reason || log.change_summary || "-"}</td>
               </tr>
             ))}
             {data.length === 0 && (
               <tr>
-                <td colSpan={7} className="p-3 text-center text-slate-400">
+                <td colSpan={7} className="p-3 text-center text-ink-400">
                   기록이 없습니다.
                 </td>
               </tr>
@@ -117,10 +117,10 @@ function LoginAttemptPanel() {
   });
 
   return (
-    <div className="overflow-x-auto rounded border border-slate-200 bg-white">
+    <div className="overflow-x-auto card">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-slate-200 text-left text-slate-500">
+          <tr className="border-b border-ink-200 text-left text-ink-500">
             <th className="p-3">시각</th>
             <th>시도한 계정</th>
             <th>결과</th>
@@ -130,21 +130,21 @@ function LoginAttemptPanel() {
         </thead>
         <tbody>
           {data.map((attempt) => (
-            <tr key={attempt.id} className="border-b border-slate-100">
+            <tr key={attempt.id} className="border-b border-ink-100">
               <td className="whitespace-nowrap p-3">{new Date(attempt.created_at).toLocaleString("ko-KR")}</td>
               <td>{attempt.email_attempted}</td>
               <td>
-                <span className={attempt.success ? "text-green-600" : "text-red-600"}>
+                <span className={attempt.success ? "text-emerald-600" : "text-red-600"}>
                   {attempt.success ? "성공" : "실패"}
                 </span>
               </td>
-              <td className="text-slate-500">{attempt.failure_reason || "-"}</td>
+              <td className="text-ink-500">{attempt.failure_reason || "-"}</td>
               <td>{attempt.ip_address || "-"}</td>
             </tr>
           ))}
           {data.length === 0 && (
             <tr>
-              <td colSpan={5} className="p-3 text-center text-slate-400">
+              <td colSpan={5} className="p-3 text-center text-ink-400">
                 기록이 없습니다.
               </td>
             </tr>

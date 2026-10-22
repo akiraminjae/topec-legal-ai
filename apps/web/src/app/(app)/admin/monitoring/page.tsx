@@ -49,9 +49,9 @@ export default function ResourceMonitoringPage() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-slate-800">리소스 모니터링</h1>
+        <h1 className="text-xl font-bold text-ink-800">리소스 모니터링</h1>
         {dataUpdatedAt > 0 && (
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-ink-400">
             마지막 갱신: {new Date(dataUpdatedAt).toLocaleTimeString("ko-KR")} (15초마다 자동 갱신)
           </p>
         )}
@@ -59,8 +59,8 @@ export default function ResourceMonitoringPage() {
 
       {data && (
         <>
-          <section className="rounded border border-slate-200 bg-white p-4">
-            <p className="mb-3 font-medium text-slate-700">DB / 파일 저장 공간</p>
+          <section className="card p-5">
+            <p className="mb-3 font-medium text-ink-700">DB / 파일 저장 공간</p>
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
               <ProgressGauge percent={Math.round(data.storage.used_percent)} />
               <div className="flex-1 text-sm">
@@ -68,10 +68,10 @@ export default function ResourceMonitoringPage() {
                   사용량 <strong>{formatBytes(data.storage.used_bytes)}</strong> / 임계치{" "}
                   <strong>{formatBytes(data.storage.quota_bytes)}</strong>
                 </p>
-                <p className="mt-1 text-slate-500">데이터베이스 자체 용량: {formatBytes(data.storage.db_size_bytes)}</p>
+                <p className="mt-1 text-ink-500">데이터베이스 자체 용량: {formatBytes(data.storage.db_size_bytes)}</p>
                 <form onSubmit={saveQuota} className="mt-3 flex items-end gap-2">
                   <div>
-                    <label className="mb-1 block text-xs text-slate-500">저장 공간 임계치 변경 (GB)</label>
+                    <label className="mb-1 block text-xs text-ink-500">저장 공간 임계치 변경 (GB)</label>
                     <input
                       className="input w-32"
                       type="number"
@@ -91,8 +91,8 @@ export default function ResourceMonitoringPage() {
             </div>
           </section>
 
-          <section className="rounded border border-slate-200 bg-white p-4">
-            <p className="mb-3 font-medium text-slate-700">AI API(토큰) 사용 현황</p>
+          <section className="card p-5">
+            <p className="mb-3 font-medium text-ink-700">AI API(토큰) 사용 현황</p>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <UsageCard label="오늘" usage={data.api_usage.today} />
               <UsageCard label="이번 달" usage={data.api_usage.this_month} />
@@ -102,7 +102,7 @@ export default function ResourceMonitoringPage() {
             <div className="mt-4 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-slate-200 text-left text-slate-500">
+                  <tr className="border-b border-ink-200 text-left text-ink-500">
                     <th className="p-2">Provider</th>
                     <th className="p-2">호출 수</th>
                     <th className="p-2">입력 토큰</th>
@@ -111,7 +111,7 @@ export default function ResourceMonitoringPage() {
                 </thead>
                 <tbody>
                   {data.api_usage.by_provider.map((p) => (
-                    <tr key={p.provider} className="border-b border-slate-100">
+                    <tr key={p.provider} className="border-b border-ink-100">
                       <td className="p-2">{AI_PROVIDER_LABELS[p.provider] || p.provider}</td>
                       <td className="p-2">{p.calls.toLocaleString()}</td>
                       <td className="p-2">{p.input_tokens.toLocaleString()}</td>
@@ -120,7 +120,7 @@ export default function ResourceMonitoringPage() {
                   ))}
                   {data.api_usage.by_provider.length === 0 && (
                     <tr>
-                      <td colSpan={4} className="p-2 text-center text-slate-400">
+                      <td colSpan={4} className="p-2 text-center text-ink-400">
                         사용 이력이 없습니다.
                       </td>
                     </tr>
@@ -137,10 +137,10 @@ export default function ResourceMonitoringPage() {
 
 function UsageCard({ label, usage }: { label: string; usage: { calls: number; input_tokens: number; output_tokens: number } }) {
   return (
-    <div className="rounded border border-slate-200 p-3">
-      <p className="text-xs text-slate-500">{label}</p>
-      <p className="mt-1 text-lg font-bold text-slate-800">{usage.calls.toLocaleString()}건</p>
-      <p className="text-xs text-slate-500">
+    <div className="rounded border border-ink-200 p-3">
+      <p className="text-xs text-ink-500">{label}</p>
+      <p className="mt-1 text-lg font-bold text-ink-800">{usage.calls.toLocaleString()}건</p>
+      <p className="text-xs text-ink-500">
         입력 {usage.input_tokens.toLocaleString()} / 출력 {usage.output_tokens.toLocaleString()} 토큰
       </p>
     </div>

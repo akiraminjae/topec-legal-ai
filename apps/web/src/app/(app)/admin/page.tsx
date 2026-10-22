@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Activity, AlertTriangle, CheckCircle2, Cpu, FileText, Sparkles, UserCheck, Users, XCircle } from "lucide-react";
+import { clsx } from "clsx";
 import { api, extractErrorMessage } from "@/lib/api";
+import { Card, CardBody, CardHeader, PageHeader, StatCard, TabBar } from "@/components/ui";
 import { DashboardStats, DepartmentOut, UserOut } from "@/lib/types";
 import { ROLE_LABELS } from "@/lib/labels";
 
@@ -46,43 +49,63 @@ export default function AdminPage() {
     refetchInterval: 30000,
   });
 
+  const TABS = [
+    { key: "stats", label: "시스템 현황", icon: Activity },
+    { key: "users", label: "사용자 관리", icon: Users },
+    {
+      key: "approvals",
+      label: "가입 승인",
+      icon: UserCheck,
+      count: pendingApprovals.length > 0 ? pendingApprovals.length : undefined,
+    },
+  ];
+
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="text-xl font-bold text-slate-800">관리자</h1>
-      <div className="flex gap-1 border-b border-slate-200">
-        <TabButton active={tab === "stats"} onClick={() => setTab("stats")} label="시스템 현황" />
-        <TabButton active={tab === "users"} onClick={() => setTab("users")} label="사용자 관리" />
-        <TabButton
-          active={tab === "approvals"}
-          onClick={() => setTab("approvals")}
-          label={`가입 승인${pendingApprovals.length > 0 ? ` (${pendingApprovals.length})` : ""}`}
-        />
-      </div>
+    <>
+      <PageHeader title="관리자" description="시스템 현황과 사용자 계정을 관리합니다." />
+
+      <TabBar tabs={TABS} active={tab} onChange={(k) => setTab(k as typeof tab)} />
 
       {tab === "stats" && stats && (
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            <Stat label="전체 사용자" value={stats.total_users} />
-            <Stat label="활성 사용자" value={stats.active_users} />
-            <Stat label="전체 계약서" value={stats.total_documents} />
-            <Stat label="이번 달 등록" value={stats.documents_this_month} />
-            <Stat label="법무검토 요청 대기" value={stats.legal_review_requested} />
-            <Stat label="법무검토 완료" value={stats.legal_review_completed} />
-            <Stat label="분석 실패 건수" value={stats.analysis_failure_count} />
-            <Stat label="AI 호출 건수" value={stats.ai_usage_total_calls} />
-          </div>
-          <div className="rounded border border-slate-200 bg-white p-4 text-sm">
-            <p className="mb-1 text-slate-500">AI 토큰 사용량</p>
-            <p>
-              입력 {stats.ai_usage_total_input_tokens.toLocaleString()} / 출력{" "}
-              {stats.ai_usage_total_output_tokens.toLocaleString()} 토큰
-            </p>
+            <StatCard label="전체 사용자" value={stats.total_users} icon={Users} />
+            <StatCard label="활성 사용자" value={stats.active_users} icon={UserCheck} />
+            <StatCard label="전체 계약서" value={stats.total_documents} icon={FileText} />
+            <StatCard label="이번 달 등록" value={stats.documents_this_month} icon={FileText} />
+            <StatCard label="법무검토 요청 대기" value={stats.legal_review_requested} icon={Activity} />
+            <StatCard label="법무검토 완료" value={stats.legal_review_completed} icon={CheckCircle2} />
+            <StatCard
+              label="분석 실패 건수"
+              value={stats.analysis_failure_count}
+              icon={AlertTriangle}
+              tone={stats.analysis_failure_count > 0 ? "alert" : "default"}
+            />
+            <StatCard label="AI 호출 건수" value={stats.ai_usage_total_calls} icon={Sparkles} />
           </div>
 
+          <Card>
+            <CardHeader title="AI 토큰 사용량" icon={Sparkles} />
+            <CardBody className="flex flex-wrap gap-8 text-sm">
+              <div>
+                <p className="text-xs font-medium text-ink-500">입력</p>
+                <p className="mt-0.5 text-xl font-bold tabular text-ink-900">
+                  {stats.ai_usage_total_input_tokens.toLocaleString()}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-ink-500">출력</p>
+                <p className="mt-0.5 text-xl font-bold tabular text-ink-900">
+                  {stats.ai_usage_total_output_tokens.toLocaleString()}
+                </p>
+              </div>
+            </CardBody>
+          </Card>
+
           {health && (
-            <div className="rounded border border-slate-200 bg-white p-4 text-sm">
-              <p className="mb-2 font-medium text-slate-700">시스템 연동 상태</p>
-              <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
+            <Card>
+              <CardHeader title="시스템 연동 상태" icon={Cpu} />
+              <CardBody className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2 lg:grid-cols-3">
                 <HealthRow label="Database" ok={health.database === "OK"} />
                 <HealthRow label="Redis" ok={health.redis === "OK"} />
                 <HealthRow label="Object Storage" ok={health.object_storage === "OK"} />
@@ -101,44 +124,33 @@ export default function AdminPage() {
                   ok={health.open_law_configured}
                   note={health.open_law_configured ? undefined : "OC 미설정"}
                 />
-              </div>
-            </div>
+              </CardBody>
+            </Card>
           )}
         </div>
       )}
 
       {tab === "users" && <UsersPanel users={users} departments={departments} />}
       {tab === "approvals" && <PendingApprovalsPanel users={pendingApprovals} />}
-    </div>
-  );
-}
-
-function TabButton({ active, onClick, label }: { active: boolean; onClick: () => void; label: string }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`px-4 py-2 text-sm font-medium ${active ? "border-b-2 border-brand-600 text-brand-700" : "text-slate-500"}`}
-    >
-      {label}
-    </button>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded border border-slate-200 bg-white p-4">
-      <p className="text-xs text-slate-500">{label}</p>
-      <p className="mt-1 text-2xl font-bold text-slate-800">{value}</p>
-    </div>
+    </>
   );
 }
 
 function HealthRow({ label, ok, note }: { label: string; ok: boolean; note?: string }) {
   return (
-    <div className="flex items-center gap-2">
-      <span className={`inline-block h-2 w-2 rounded-full ${ok ? "bg-green-500" : "bg-red-500"}`} />
-      <span className="text-slate-700">{label}</span>
-      {note && <span className="text-xs text-slate-400">({note})</span>}
+    <div
+      className={clsx(
+        "flex items-center gap-2 rounded-md border px-3 py-2",
+        ok ? "border-emerald-200 bg-emerald-50/60" : "border-red-200 bg-red-50/60"
+      )}
+    >
+      {ok ? (
+        <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" strokeWidth={2} />
+      ) : (
+        <XCircle className="h-4 w-4 shrink-0 text-red-600" strokeWidth={2} />
+      )}
+      <span className="min-w-0 truncate font-medium text-ink-800">{label}</span>
+      {note && <span className="ml-auto shrink-0 text-xs text-ink-500">{note}</span>}
     </div>
   );
 }
@@ -217,12 +229,12 @@ function UsersPanel({ users, departments }: { users: UserOut[]; departments: Dep
 
   return (
     <div className="flex flex-col gap-4">
-      <form onSubmit={createUser} className="flex flex-wrap items-end gap-2 rounded border border-slate-200 bg-white p-4">
+      <form onSubmit={createUser} className="flex flex-wrap items-end gap-2 card p-5">
         <TextField label="사번" value={form.employee_no} onChange={(v) => setForm({ ...form, employee_no: v })} />
         <TextField label="이메일" value={form.email} onChange={(v) => setForm({ ...form, email: v })} />
         <TextField label="이름" value={form.full_name} onChange={(v) => setForm({ ...form, full_name: v })} />
         <div>
-          <label className="mb-1 block text-xs text-slate-500">부서</label>
+          <label className="mb-1 block text-xs text-ink-500">부서</label>
           <select className="input" value={form.department_id} onChange={(e) => setForm({ ...form, department_id: e.target.value })}>
             <option value="">미지정</option>
             {departments.map((d) => (
@@ -233,7 +245,7 @@ function UsersPanel({ users, departments }: { users: UserOut[]; departments: Dep
           </select>
         </div>
         <div>
-          <label className="mb-1 block text-xs text-slate-500">역할</label>
+          <label className="mb-1 block text-xs text-ink-500">역할</label>
           <select className="input" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
             {Object.entries(ROLE_LABELS).map(([k, v]) => (
               <option key={k} value={k}>
@@ -252,10 +264,10 @@ function UsersPanel({ users, departments }: { users: UserOut[]; departments: Dep
         </div>
       )}
 
-      <div className="rounded border border-slate-200 bg-white">
+      <div className="card">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-slate-200 text-left text-slate-500">
+            <tr className="border-b border-ink-200 text-left text-ink-500">
               <th className="p-3">사번</th>
               <th>이름</th>
               <th>이메일</th>
@@ -268,7 +280,7 @@ function UsersPanel({ users, departments }: { users: UserOut[]; departments: Dep
           </thead>
           <tbody>
             {users.map((u) => (
-              <tr key={u.id} className="border-b border-slate-100 align-top">
+              <tr key={u.id} className="border-b border-ink-100 align-top">
                 <td className="p-3">{u.employee_no}</td>
                 <td>{u.full_name}</td>
                 <td>{u.email}</td>
@@ -278,7 +290,7 @@ function UsersPanel({ users, departments }: { users: UserOut[]; departments: Dep
                   {editingUserId === u.id ? (
                     <div className="flex flex-col gap-1">
                       {Object.entries(ROLE_LABELS).map(([roleKey, label]) => (
-                        <label key={roleKey} className="flex items-center gap-1.5 text-xs text-slate-700">
+                        <label key={roleKey} className="flex items-center gap-1.5 text-xs text-ink-700">
                           <input
                             type="checkbox"
                             checked={editRoles.has(roleKey)}
@@ -303,7 +315,7 @@ function UsersPanel({ users, departments }: { users: UserOut[]; departments: Dep
                       >
                         저장
                       </button>
-                      <button onClick={cancelEditRoles} className="text-xs text-slate-500 hover:underline">
+                      <button onClick={cancelEditRoles} className="text-xs text-ink-500 hover:underline">
                         취소
                       </button>
                     </div>
@@ -312,7 +324,7 @@ function UsersPanel({ users, departments }: { users: UserOut[]; departments: Dep
                       <button onClick={() => startEditRoles(u)} className="text-xs text-brand-600 hover:underline">
                         권한 수정
                       </button>
-                      <button onClick={() => toggleActive(u)} className="text-xs text-slate-500 hover:underline">
+                      <button onClick={() => toggleActive(u)} className="text-xs text-ink-500 hover:underline">
                         {u.is_active ? "비활성화" : "활성화"}
                       </button>
                     </div>
@@ -330,7 +342,7 @@ function UsersPanel({ users, departments }: { users: UserOut[]; departments: Dep
 function TextField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
     <div>
-      <label className="mb-1 block text-xs text-slate-500">{label}</label>
+      <label className="mb-1 block text-xs text-ink-500">{label}</label>
       <input className="input" value={value} onChange={(e) => onChange(e.target.value)} required />
     </div>
   );
@@ -383,7 +395,7 @@ function PendingApprovalsPanel({ users }: { users: UserOut[] }) {
   }
 
   if (users.length === 0) {
-    return <p className="rounded border border-slate-200 bg-white p-6 text-center text-sm text-slate-400">승인 대기 중인 가입 신청이 없습니다.</p>;
+    return <p className="card p-6 text-center text-sm text-ink-400">승인 대기 중인 가입 신청이 없습니다.</p>;
   }
 
   return (
@@ -392,18 +404,18 @@ function PendingApprovalsPanel({ users }: { users: UserOut[] }) {
       {users.map((u) => {
         const sel = selectionFor(u.id);
         return (
-          <div key={u.id} className="rounded border border-slate-200 bg-white p-4">
+          <div key={u.id} className="card p-5">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <p className="font-medium text-slate-800">
-                  {u.full_name} <span className="text-sm font-normal text-slate-500">({u.employee_no})</span>
+                <p className="font-medium text-ink-800">
+                  {u.full_name} <span className="text-sm font-normal text-ink-500">({u.employee_no})</span>
                 </p>
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-ink-500">
                   {u.email} · {u.phone_number || "-"}
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <button onClick={() => reject(u)} className="rounded border border-slate-300 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">
+                <button onClick={() => reject(u)} className="input h-9 w-auto text-ink-600 hover:bg-ink-50">
                   반려
                 </button>
                 <button onClick={() => approve(u)} className="btn-primary">
@@ -411,16 +423,16 @@ function PendingApprovalsPanel({ users }: { users: UserOut[] }) {
                 </button>
               </div>
             </div>
-            <div className="mt-3 flex flex-wrap gap-4 border-t border-slate-100 pt-3 text-sm">
-              <label className="flex items-center gap-2 text-slate-400">
+            <div className="mt-3 flex flex-wrap gap-4 border-t border-ink-100 pt-3 text-sm">
+              <label className="flex items-center gap-2 text-ink-400">
                 <input type="checkbox" checked disabled />
                 일반직원 기본 (대시보드 · 내 문서 · 계약서 업로드)
               </label>
-              <label className="flex items-center gap-2 text-slate-700">
+              <label className="flex items-center gap-2 text-ink-700">
                 <input type="checkbox" checked={sel.litigation} onChange={() => toggle(u.id, "litigation")} />
                 소송·분쟁 사건 접근 권한
               </label>
-              <label className="flex items-center gap-2 text-slate-700">
+              <label className="flex items-center gap-2 text-ink-700">
                 <input type="checkbox" checked={sel.legalReviewer} onChange={() => toggle(u.id, "legalReviewer")} />
                 법무 검토함 접근 권한 (법무담당자)
               </label>

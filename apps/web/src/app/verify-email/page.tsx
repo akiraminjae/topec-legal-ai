@@ -30,13 +30,13 @@ function VerifyEmailContent() {
   }, [token]);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-      <div className="w-full max-w-sm rounded-lg border border-slate-200 bg-white p-8 text-center shadow-sm">
-        {status === "loading" && <p className="text-sm text-slate-500">이메일 인증을 처리하고 있습니다...</p>}
+    <main className="flex min-h-screen items-center justify-center bg-ink-50 px-4">
+      <div className="card w-full max-w-sm p-8">
+        {status === "loading" && <p className="text-sm text-ink-500">이메일 인증을 처리하고 있습니다...</p>}
         {status === "success" && (
           <>
             <h1 className="mb-2 text-lg font-bold text-brand-700">인증 완료</h1>
-            <p className="mb-4 text-sm text-slate-600">{message}</p>
+            <p className="mb-4 text-sm text-ink-600">{message}</p>
             <Link href="/login" className="rounded bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700">
               로그인하러 가기
             </Link>
@@ -45,7 +45,7 @@ function VerifyEmailContent() {
         {status === "error" && (
           <>
             <h1 className="mb-2 text-lg font-bold text-red-600">인증 실패</h1>
-            <p className="mb-4 text-sm text-slate-600">{message}</p>
+            <p className="mb-4 text-sm text-ink-600">{message}</p>
             <Link href="/signup" className="text-sm text-brand-600 hover:underline">
               회원가입 화면으로 돌아가기
             </Link>

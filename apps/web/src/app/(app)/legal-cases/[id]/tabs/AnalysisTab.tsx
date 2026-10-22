@@ -46,10 +46,10 @@ export function AnalysisTab({ caseId, legalCase }: { caseId: string; legalCase: 
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between rounded border border-slate-200 bg-white p-4">
+      <div className="flex items-center justify-between card p-5">
         <div>
-          <h3 className="font-semibold text-slate-700">사건 통합분석</h3>
-          <p className="text-xs text-slate-500">
+          <h3 className="font-semibold text-ink-700">사건 통합분석</h3>
+          <p className="text-xs text-ink-500">
             업로드된 문서들의 개별 1차 분석결과를 종합하여 사건 전체 관점의 요약을 생성합니다. 문서가 추가되면 다시
             실행해 최신 자료를 반영하세요.
           </p>
@@ -62,17 +62,17 @@ export function AnalysisTab({ caseId, legalCase }: { caseId: string; legalCase: 
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       {!analysis && !running && (
-        <div className="rounded border border-slate-200 bg-white p-6 text-center text-slate-400">
+        <div className="card p-6 text-center text-ink-400">
           아직 통합분석 결과가 없습니다. 문서 업로드 및 개별 처리가 완료된 후 &quot;통합분석 실행&quot;을 눌러주세요.
         </div>
       )}
 
       {analysis && (
-        <div className="rounded border border-slate-200 bg-white p-4">
+        <div className="card p-5">
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               {analysis.ai_provider && <AIProviderBadge provider={analysis.ai_provider} isMock={analysis.is_mock} />}
-              <span className="text-xs text-slate-400">분석 대상 문서 {analysis.document_count}건</span>
+              <span className="text-xs text-ink-400">분석 대상 문서 {analysis.document_count}건</span>
             </div>
             <ShareMenu title={`${legalCase.case_name} 사건 통합분석`} text={shareText} />
           </div>
@@ -92,8 +92,8 @@ export function AnalysisTab({ caseId, legalCase }: { caseId: string; legalCase: 
 function Section({ title, value }: { title: string; value: string }) {
   return (
     <div className="mb-4">
-      <h4 className="mb-1 text-sm font-semibold text-slate-700">{title}</h4>
-      <p className="whitespace-pre-wrap text-sm text-slate-600">{value}</p>
+      <h4 className="mb-1 text-sm font-semibold text-ink-700">{title}</h4>
+      <p className="whitespace-pre-wrap text-sm text-ink-600">{value}</p>
     </div>
   );
 }

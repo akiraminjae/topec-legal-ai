@@ -41,40 +41,40 @@ export default function ChangePasswordPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-      <div className="w-full max-w-sm rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
+    <main className="flex min-h-screen items-center justify-center bg-ink-50 px-4">
+      <div className="card w-full max-w-sm p-8">
         <h1 className="mb-1 text-lg font-bold text-brand-700">비밀번호 변경</h1>
-        <p className="mb-6 text-sm text-slate-500">
+        <p className="mb-6 text-sm text-ink-500">
           {user?.must_change_password
             ? "최초 로그인입니다. 새 비밀번호로 변경해 주세요."
             : "비밀번호를 변경합니다."}
         </p>
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <div>
-            <label className="mb-1 block text-sm text-slate-600">현재 비밀번호</label>
+            <label className="mb-1 block text-sm text-ink-600">현재 비밀번호</label>
             <input
               type="password"
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="w-full input"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               required
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm text-slate-600">새 비밀번호 (10자 이상)</label>
+            <label className="mb-1 block text-sm text-ink-600">새 비밀번호 (10자 이상)</label>
             <input
               type="password"
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="w-full input"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               required
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm text-slate-600">새 비밀번호 확인</label>
+            <label className="mb-1 block text-sm text-ink-600">새 비밀번호 확인</label>
             <input
               type="password"
-              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+              className="w-full input"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required

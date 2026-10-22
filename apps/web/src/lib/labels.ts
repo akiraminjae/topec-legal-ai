@@ -59,22 +59,22 @@ export const RISK_LEVEL_LABELS: Record<string, string> = {
 };
 
 export const RISK_LEVEL_COLORS: Record<string, string> = {
-  CRITICAL: "bg-red-100 text-red-800 border-red-300",
-  HIGH: "bg-orange-100 text-orange-800 border-orange-300",
-  MEDIUM: "bg-yellow-100 text-yellow-800 border-yellow-300",
-  LOW: "bg-blue-100 text-blue-800 border-blue-300",
-  ACCEPTABLE: "bg-green-100 text-green-800 border-green-300",
+  CRITICAL: "border-red-200 bg-red-50 text-red-700",
+  HIGH: "border-orange-200 bg-orange-50 text-orange-700",
+  MEDIUM: "border-amber-200 bg-amber-50 text-amber-700",
+  LOW: "border-blue-200 bg-blue-50 text-blue-700",
+  ACCEPTABLE: "border-emerald-200 bg-emerald-50 text-emerald-700",
 };
 
 /** Hex equivalents of RISK_LEVEL_COLORS for use in chart fills (recharts can't
- * consume Tailwind utility classes). Kept in sync with the Tailwind palette
- * shades used above (red/orange/yellow/blue/green-500). */
+ * consume Tailwind utility classes). Kept in sync with the `risk` palette in
+ * tailwind.config.ts — change both together. */
 export const RISK_LEVEL_HEX: Record<string, string> = {
-  CRITICAL: "#ef4444",
-  HIGH: "#f97316",
-  MEDIUM: "#eab308",
-  LOW: "#3b82f6",
-  ACCEPTABLE: "#22c55e",
+  CRITICAL: "#dc2626",
+  HIGH: "#ea580c",
+  MEDIUM: "#ca8a04",
+  LOW: "#2563eb",
+  ACCEPTABLE: "#16a34a",
 };
 
 export const STATUS_HEX: Record<string, string> = {

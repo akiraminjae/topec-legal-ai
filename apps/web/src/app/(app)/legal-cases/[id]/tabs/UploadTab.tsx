@@ -106,14 +106,14 @@ export function UploadTab({ caseId }: { caseId: string }) {
   return (
     <div className="flex flex-col gap-4">
       <div
-        className="flex flex-col items-center justify-center gap-2 rounded border-2 border-dashed border-slate-300 bg-white p-8 text-center"
+        className="flex flex-col items-center justify-center gap-2 rounded border-2 border-dashed border-ink-300 bg-white p-8 text-center"
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => {
           e.preventDefault();
           addFiles(e.dataTransfer.files);
         }}
       >
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-ink-500">
           여러 개의 PDF 파일을 이 영역에 끌어다 놓거나, 아래 버튼으로 한꺼번에 선택하세요.
         </p>
         <input
@@ -130,9 +130,9 @@ export function UploadTab({ caseId }: { caseId: string }) {
       </div>
 
       {staged.length > 0 && (
-        <div className="rounded border border-slate-200 bg-white p-4">
+        <div className="card p-5">
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="font-semibold text-slate-700">업로드 대기 목록 ({staged.length}건)</h3>
+            <h3 className="font-semibold text-ink-700">업로드 대기 목록 ({staged.length}건)</h3>
             <div className="flex gap-2">
               <button type="button" onClick={clearCompleted} className="btn-secondary text-xs">
                 완료 항목 정리
@@ -144,20 +144,20 @@ export function UploadTab({ caseId }: { caseId: string }) {
           </div>
 
           {uploading && (
-            <div className="mb-3 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+            <div className="mb-3 h-1.5 w-full overflow-hidden rounded-full bg-ink-100">
               <div className="h-full rounded-full bg-brand-500 transition-all duration-300" style={{ width: `${overallProgress}%` }} />
             </div>
           )}
 
           <ul className="flex flex-col gap-2">
             {staged.map((s) => (
-              <li key={s.key} className="flex items-center justify-between gap-2 rounded border border-slate-100 px-3 py-2 text-sm">
+              <li key={s.key} className="flex items-center justify-between gap-2 rounded border border-ink-100 px-3 py-2 text-sm">
                 <div className="flex min-w-0 flex-1 items-center gap-2">
                   <span className="truncate">{s.file.name}</span>
-                  <span className="shrink-0 text-xs text-slate-400">({(s.file.size / 1024).toFixed(0)}KB)</span>
+                  <span className="shrink-0 text-xs text-ink-400">({(s.file.size / 1024).toFixed(0)}KB)</span>
                 </div>
                 <select
-                  className="rounded border border-slate-300 px-2 py-1 text-xs"
+                  className="rounded border border-ink-300 px-2 py-1 text-xs"
                   value={s.documentType}
                   disabled={s.status !== "대기"}
                   onChange={(e) => updateDocType(s.key, e.target.value)}
@@ -170,7 +170,7 @@ export function UploadTab({ caseId }: { caseId: string }) {
                 </select>
                 <StatusChip status={s.status} error={s.error} />
                 {s.status === "대기" && (
-                  <button type="button" onClick={() => removeStaged(s.key)} className="text-xs text-slate-400 hover:text-red-600">
+                  <button type="button" onClick={() => removeStaged(s.key)} className="text-xs text-ink-400 hover:text-red-600">
                     제거
                   </button>
                 )}
@@ -183,20 +183,20 @@ export function UploadTab({ caseId }: { caseId: string }) {
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       {batches.length > 0 && (
-        <div className="rounded border border-slate-200 bg-white p-4">
-          <h3 className="mb-3 font-semibold text-slate-700">업로드 배치 이력</h3>
+        <div className="card p-5">
+          <h3 className="mb-3 font-semibold text-ink-700">업로드 배치 이력</h3>
           <ul className="flex flex-col gap-2">
             {batches.map((b) => (
-              <li key={b.id} className="rounded border border-slate-100 p-3 text-sm">
+              <li key={b.id} className="rounded border border-ink-100 p-3 text-sm">
                 <div className="flex items-center justify-between">
-                  <span className="font-medium text-slate-700">
+                  <span className="font-medium text-ink-700">
                     {CASE_UPLOAD_BATCH_STATUS_LABELS[b.status] || b.status} · 전체 {b.total_files}건
                   </span>
-                  <span className="text-xs text-slate-500">
+                  <span className="text-xs text-ink-500">
                     처리완료 {b.processed_files} · 실패/중복 {b.failed_files}
                   </span>
                 </div>
-                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-ink-100">
                   <div className="h-full rounded-full bg-brand-500" style={{ width: `${b.progress_percent}%` }} />
                 </div>
                 {b.error_summary && <p className="mt-2 text-xs text-amber-700">{b.error_summary}</p>}
@@ -217,12 +217,12 @@ export function UploadTab({ caseId }: { caseId: string }) {
 function StatusChip({ status, error }: { status: StagedFile["status"]; error?: string }) {
   const color =
     status === "업로드 완료"
-      ? "bg-green-50 text-green-700 border-green-300"
+      ? "bg-emerald-50 text-emerald-700 border-emerald-300"
       : status === "실패"
         ? "bg-red-50 text-red-700 border-red-300"
         : status === "업로드 중"
           ? "bg-brand-50 text-brand-700 border-brand-300"
-          : "bg-slate-50 text-slate-500 border-slate-300";
+          : "bg-ink-50 text-ink-500 border-ink-300";
   return (
     <span className={`shrink-0 rounded-full border px-2 py-0.5 text-xs ${color}`} title={error}>
       {status}

@@ -19,7 +19,7 @@ export function ProgressGauge({ percent, size = 96 }: { percent: number; size?: 
           r={radius}
           fill="none"
           strokeWidth={stroke}
-          className="stroke-slate-200"
+          className="stroke-ink-200"
         />
         <circle
           cx={size / 2}

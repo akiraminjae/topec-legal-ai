@@ -4,8 +4,11 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, extractErrorMessage } from "@/lib/api";
 import { CrossReviewOut, DocumentFileOut, DocumentOut, DocumentSummaryOut } from "@/lib/types";
+import { Download, FileCheck2, FileDown, FileText, Paperclip, ScrollText, Users } from "lucide-react";
+import { clsx } from "clsx";
 import { MockModeBanner, AIProviderBadge } from "@/components/Badges";
 import { ShareMenu } from "@/components/ShareMenu";
+import { Card, CardBody, CardHeader, EmptyState, Notice } from "@/components/ui";
 
 interface ReportOut {
   id: string;
@@ -113,7 +116,7 @@ export function OverviewTab({ documentId, document }: { documentId: string; docu
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4 rounded border border-slate-200 bg-white p-4 text-sm md:grid-cols-4">
+      <div className="card grid grid-cols-2 gap-5 p-5 text-sm md:grid-cols-4">
         <InfoItem label="상대방" value={document.counterparty_name || "-"} />
         {document.document_category === "LITIGATION" ? (
           <>
@@ -131,54 +134,68 @@ export function OverviewTab({ documentId, document }: { documentId: string; docu
       </div>
 
       {files.length > 0 && (
-        <div className="rounded border border-slate-200 bg-white p-4">
-          <h3 className="mb-3 font-semibold text-slate-700">첨부파일 ({files.length}건)</h3>
-          <ul className="flex flex-col gap-1">
+        <Card>
+          <CardHeader title={`첨부파일 ${files.length}건`} icon={Paperclip} />
+          <CardBody className="flex flex-col gap-1.5 p-3">
             {files.map((f, i) => (
-              <li
+              <div
                 key={f.id}
-                className="flex items-center justify-between rounded border border-slate-100 px-3 py-1.5 text-sm"
+                className="flex items-center gap-3 rounded-md border border-ink-100 px-3 py-2 text-sm hover:bg-ink-50"
               >
-                <span className="truncate">
+                <FileText className="h-4 w-4 shrink-0 text-ink-400" strokeWidth={2} />
+                <span className="min-w-0 flex-1 truncate">
                   {i === 0 && (
-                    <span className="mr-2 rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-medium text-brand-700">
-                      주 파일(분석대상)
-                    </span>
+                    <span className="badge mr-2 border-brand-200 bg-brand-50 text-brand-700">주 파일(분석대상)</span>
                   )}
                   {f.original_filename}
-                  <span className="ml-2 text-xs text-slate-400">({(f.size_bytes / 1024).toFixed(0)}KB)</span>
+                  <span className="ml-2 text-xs tabular text-ink-400">({(f.size_bytes / 1024).toFixed(0)}KB)</span>
                 </span>
-                <button onClick={() => downloadFile(f.id, f.original_filename)} className="shrink-0 text-brand-600 hover:underline">
+                <button
+                  onClick={() => downloadFile(f.id, f.original_filename)}
+                  className="btn-ghost btn-sm shrink-0 text-brand-700"
+                >
+                  <Download className="h-3.5 w-3.5" strokeWidth={2} />
                   다운로드
                 </button>
-              </li>
+              </div>
             ))}
-          </ul>
-        </div>
+          </CardBody>
+        </Card>
       )}
 
       {summary && (
-        <div className="rounded border border-slate-200 bg-white p-4">
-          <h3 className="mb-2 font-semibold text-slate-700">업무범위 요약</h3>
-          <p className="whitespace-pre-wrap text-sm text-slate-600">{summary.scope_summary || "-"}</p>
-          <h3 className="mb-2 mt-4 font-semibold text-slate-700">주요 위험 요약</h3>
-          <p className="whitespace-pre-wrap text-sm text-slate-600">{summary.top_risks_summary || "-"}</p>
-        </div>
+        <Card>
+          <CardHeader title="AI 검토 요약" icon={ScrollText} />
+          <CardBody className="flex flex-col gap-4">
+            <section>
+              <h3 className="mb-1.5 text-sm font-semibold text-ink-900">업무범위 요약</h3>
+              <p className="whitespace-pre-wrap text-sm leading-relaxed text-ink-600">{summary.scope_summary || "-"}</p>
+            </section>
+            <section>
+              <h3 className="mb-1.5 text-sm font-semibold text-ink-900">주요 위험 요약</h3>
+              <p className="whitespace-pre-wrap text-sm leading-relaxed text-ink-600">{summary.top_risks_summary || "-"}</p>
+            </section>
+          </CardBody>
+        </Card>
       )}
 
       {crossReview && (
-        <div className="rounded border border-indigo-200 bg-indigo-50/50 p-4">
-          <div className="mb-2 flex flex-wrap items-center gap-2">
-            <h3 className="font-semibold text-slate-700">듀얼 AI 교차검토</h3>
+        <div className="rounded-lg border border-indigo-200 bg-indigo-50/60 p-5">
+          <div className="mb-2.5 flex flex-wrap items-center gap-2">
+            <h3 className="flex items-center gap-1.5 text-base font-semibold text-ink-900">
+              <Users className="h-4 w-4 text-indigo-600" strokeWidth={2} />
+              듀얼 AI 교차검토
+            </h3>
             <AIProviderBadge provider={crossReview.provider} isMock={crossReview.is_mock} />
             <span
-              className={`rounded px-2 py-0.5 text-xs font-medium ${
+              className={clsx(
+                "badge",
                 crossReview.agreement_level === "AGREE"
-                  ? "bg-green-100 text-green-700"
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                   : crossReview.agreement_level === "DISAGREE"
-                    ? "bg-red-100 text-red-700"
-                    : "bg-amber-100 text-amber-700"
-              }`}
+                    ? "border-red-200 bg-red-50 text-red-700"
+                    : "border-amber-200 bg-amber-50 text-amber-700"
+              )}
             >
               {crossReview.agreement_level === "AGREE"
                 ? "1차 분석에 동의"
@@ -187,68 +204,96 @@ export function OverviewTab({ documentId, document }: { documentId: string; docu
                   : "부분 동의"}
             </span>
             {crossReview.confidence !== null && (
-              <span className="text-xs text-slate-400">확신도 {crossReview.confidence}%</span>
+              <span className="text-xs tabular text-ink-500">확신도 {crossReview.confidence}%</span>
             )}
           </div>
-          <p className="whitespace-pre-wrap text-sm text-slate-600">{crossReview.overall_opinion}</p>
+          <p className="whitespace-pre-wrap text-sm leading-relaxed text-ink-700">{crossReview.overall_opinion}</p>
           {crossReview.additional_risks && (
             <>
-              <h4 className="mb-1 mt-3 text-sm font-semibold text-slate-700">2차 AI가 지적한 추가 리스크</h4>
-              <p className="whitespace-pre-wrap text-sm text-slate-600">{crossReview.additional_risks}</p>
+              <h4 className="mb-1 mt-4 text-sm font-semibold text-ink-900">2차 AI가 지적한 추가 리스크</h4>
+              <p className="whitespace-pre-wrap text-sm leading-relaxed text-ink-700">{crossReview.additional_risks}</p>
             </>
           )}
           {crossReview.missed_points && (
             <>
-              <h4 className="mb-1 mt-3 text-sm font-semibold text-slate-700">1차 분석이 누락한 논점</h4>
-              <p className="whitespace-pre-wrap text-sm text-slate-600">{crossReview.missed_points}</p>
+              <h4 className="mb-1 mt-4 text-sm font-semibold text-ink-900">1차 분석이 누락한 논점</h4>
+              <p className="whitespace-pre-wrap text-sm leading-relaxed text-ink-700">{crossReview.missed_points}</p>
             </>
           )}
         </div>
       )}
 
-      <div className="rounded border border-slate-200 bg-white p-4">
-        <h3 className="mb-3 font-semibold text-slate-700">검토보고서 생성</h3>
-        <div className="flex flex-wrap gap-2">
-          <button disabled={generating} onClick={() => generateReport("REVIEW_REPORT", "DOCX")} className="btn-secondary">
-            검토보고서 (DOCX)
-          </button>
-          <button disabled={generating} onClick={() => generateReport("REVIEW_REPORT", "PDF")} className="btn-secondary">
-            검토보고서 (PDF)
-          </button>
-          <button
-            disabled={generating || document.document_category === "LITIGATION"}
-            onClick={() => generateReport("REVISION_REQUEST_LETTER", "DOCX")}
-            className="btn-secondary"
-            hidden={document.document_category === "LITIGATION"}
-          >
-            상대방 수정요청서 (DOCX)
-          </button>
-        </div>
-        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
-        <ul className="mt-3 flex flex-col gap-1 text-sm">
-          {reports.map((r) => (
-            <li key={r.id} className="flex items-center justify-between rounded border border-slate-100 px-3 py-1.5">
-              <span>
-                {r.report_type === "REVISION_REQUEST_LETTER" ? "수정요청서" : "검토보고서"} ({r.format})
-                {r.pdf_conversion_failed && <span className="ml-2 text-xs text-amber-600">PDF 변환 실패 → DOCX 제공</span>}
-              </span>
-              <button onClick={() => download(r.id, r.format, r.report_type)} className="text-brand-600 hover:underline">
-                다운로드
+      <Card>
+        <CardHeader
+          title="검토보고서 생성"
+          icon={FileDown}
+          description="생성한 보고서는 아래 목록에서 내려받을 수 있습니다."
+        />
+        <CardBody className="flex flex-col gap-4">
+          <div className="flex flex-wrap gap-2">
+            <button disabled={generating} onClick={() => generateReport("REVIEW_REPORT", "DOCX")} className="btn-secondary">
+              <FileText className="h-4 w-4" strokeWidth={2} />
+              검토보고서 (DOCX)
+            </button>
+            <button disabled={generating} onClick={() => generateReport("REVIEW_REPORT", "PDF")} className="btn-secondary">
+              <FileText className="h-4 w-4" strokeWidth={2} />
+              검토보고서 (PDF)
+            </button>
+            {document.document_category !== "LITIGATION" && (
+              <button
+                disabled={generating}
+                onClick={() => generateReport("REVISION_REQUEST_LETTER", "DOCX")}
+                className="btn-secondary"
+              >
+                <FileCheck2 className="h-4 w-4" strokeWidth={2} />
+                상대방 수정요청서 (DOCX)
               </button>
-            </li>
-          ))}
-          {reports.length === 0 && <li className="text-slate-400">생성된 보고서가 없습니다.</li>}
-        </ul>
-      </div>
+            )}
+          </div>
+
+          {error && <Notice tone="danger">{error}</Notice>}
+
+          {reports.length === 0 ? (
+            <EmptyState icon={FileDown} title="생성된 보고서가 없습니다." compact />
+          ) : (
+            <div className="flex flex-col gap-1.5">
+              {reports.map((r) => (
+                <div
+                  key={r.id}
+                  className="flex items-center gap-3 rounded-md border border-ink-100 px-3 py-2 text-sm hover:bg-ink-50"
+                >
+                  <FileText className="h-4 w-4 shrink-0 text-ink-400" strokeWidth={2} />
+                  <span className="min-w-0 flex-1">
+                    {r.report_type === "REVISION_REQUEST_LETTER" ? "수정요청서" : "검토보고서"}{" "}
+                    <span className="text-ink-400">({r.format})</span>
+                    {r.pdf_conversion_failed && (
+                      <span className="ml-2 text-xs text-amber-600">PDF 변환 실패 → DOCX 제공</span>
+                    )}
+                  </span>
+                  <button
+                    onClick={() => download(r.id, r.format, r.report_type)}
+                    className="btn-ghost btn-sm shrink-0 text-brand-700"
+                  >
+                    <Download className="h-3.5 w-3.5" strokeWidth={2} />
+                    다운로드
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardBody>
+      </Card>
     </div>
   );
 }
 
 function InfoItem({ label, value }: { label: string; value: string }) {
   return (
-    <div>
-      <p className="text-xs text-slate-400">{label}</p>
-      <p className="font-medium text-slate-700">{value}</p>
+    <div className="min-w-0">
+      <p className="text-xs font-medium text-ink-500">{label}</p>
+      <p className="mt-0.5 truncate font-semibold text-ink-900" title={value}>
+        {value}
+      </p>
     </div>
   );
 }

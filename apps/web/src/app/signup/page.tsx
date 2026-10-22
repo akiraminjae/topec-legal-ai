@@ -59,19 +59,19 @@ export default function SignupPage() {
 
   if (submittedEmail) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-        <div className="w-full max-w-sm rounded-lg border border-slate-200 bg-white p-8 text-center shadow-sm">
+      <main className="flex min-h-screen items-center justify-center bg-ink-50 px-4">
+        <div className="card w-full max-w-sm p-8 text-center">
           <h1 className="mb-2 text-lg font-bold text-brand-700">인증 메일을 발송했습니다</h1>
-          <p className="mb-4 text-sm text-slate-600">
+          <p className="mb-4 text-sm text-ink-600">
             <strong>{submittedEmail}</strong>로 발송된 인증 메일의 링크를 클릭한 후, 관리자 승인이 완료되면 로그인할 수
             있습니다.
           </p>
           <button onClick={handleResend} className="text-sm text-brand-600 hover:underline">
             인증 메일 다시 받기
           </button>
-          {resendMessage && <p className="mt-2 text-xs text-slate-500">{resendMessage}</p>}
-          <div className="mt-6 border-t border-slate-100 pt-4">
-            <Link href="/login" className="text-sm text-slate-500 hover:underline">
+          {resendMessage && <p className="mt-2 text-xs text-ink-500">{resendMessage}</p>}
+          <div className="mt-6 border-t border-ink-100 pt-4">
+            <Link href="/login" className="text-sm text-ink-500 hover:underline">
               로그인 화면으로 이동
             </Link>
           </div>
@@ -81,11 +81,11 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
-      <div className="w-full max-w-sm rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
+    <main className="flex min-h-screen items-center justify-center bg-ink-50 px-4 py-10">
+      <div className="card w-full max-w-sm p-8">
         <div className="mb-6 text-center">
           <h1 className="text-lg font-bold text-brand-700">회원가입</h1>
-          <p className="mt-1 text-sm text-slate-500">TOPEC 임직원 회사 이메일로만 가입할 수 있습니다.</p>
+          <p className="mt-1 text-sm text-ink-500">TOPEC 임직원 회사 이메일로만 가입할 수 있습니다.</p>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <Field label="사용자 ID" value={form.employee_no} onChange={(v) => setForm({ ...form, employee_no: v })} />
@@ -124,7 +124,7 @@ export default function SignupPage() {
           </button>
         </form>
         <div className="mt-6 text-center">
-          <Link href="/login" className="text-sm text-slate-500 hover:underline">
+          <Link href="/login" className="text-sm text-ink-500 hover:underline">
             이미 계정이 있으신가요? 로그인
           </Link>
         </div>
@@ -148,10 +148,10 @@ function Field({
 }) {
   return (
     <div>
-      <label className="mb-1 block text-sm text-slate-600">{label}</label>
+      <label className="mb-1 block text-sm text-ink-600">{label}</label>
       <input
         type={type}
-        className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+        className="w-full input"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}

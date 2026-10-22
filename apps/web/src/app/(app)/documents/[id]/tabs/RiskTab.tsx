@@ -45,7 +45,7 @@ export function RiskTab({ documentId }: { documentId: string }) {
   const order = ["CRITICAL", "HIGH", "MEDIUM", "LOW", "ACCEPTABLE"];
   const sorted = [...filtered].sort((a, b) => order.indexOf(a.risk_level) - order.indexOf(b.risk_level));
 
-  if (isLoading) return <p className="text-slate-400">불러오는 중...</p>;
+  if (isLoading) return <p className="text-ink-400">불러오는 중...</p>;
 
   return (
     <div className="flex flex-col gap-3">
@@ -60,33 +60,33 @@ export function RiskTab({ documentId }: { documentId: string }) {
       </div>
 
       {sorted.length === 0 && (
-        <div className="rounded border border-slate-200 bg-white p-6 text-center text-slate-400">
+        <div className="card p-6 text-center text-ink-400">
           탐지된 위험사항이 없습니다.
         </div>
       )}
 
       {sorted.map((f) => (
-        <div key={f.id} className="rounded border border-slate-200 bg-white">
+        <div key={f.id} className="card">
           <button
             className="flex w-full items-center justify-between p-4 text-left"
             onClick={() => setExpanded(expanded === f.id ? null : f.id)}
           >
             <div className="flex items-center gap-3">
               <RiskBadge level={f.risk_level} />
-              <span className="font-medium text-slate-700">{f.title}</span>
+              <span className="font-medium text-ink-700">{f.title}</span>
               {f.legal_review_required && (
                 <span className="rounded bg-red-50 px-2 py-0.5 text-xs text-red-600">법무검토 필요</span>
               )}
             </div>
             <span
-              className="rounded-full border border-slate-200 px-2 py-0.5 text-xs text-slate-400"
+              className="rounded-full border border-ink-200 px-2 py-0.5 text-xs text-ink-400"
               title="AI 판단 신뢰도(참고용)"
             >
               신뢰도 참고값 {f.confidence}%
             </span>
           </button>
           {expanded === f.id && (
-            <div className="border-t border-slate-100 p-4 text-sm">
+            <div className="border-t border-ink-100 p-4 text-sm">
               <div className="mb-3 flex justify-end">
                 <ShareMenu title={f.title} text={findingShareText(f)} />
               </div>
@@ -98,15 +98,15 @@ export function RiskTab({ documentId }: { documentId: string }) {
                 <Row label="추가 확인사항" value={f.questions_for_user.join(", ")} />
               )}
               <div className="mt-2">
-                <p className="mb-1 text-xs font-medium text-slate-500">관련 법령·판례</p>
+                <p className="mb-1 text-xs font-medium text-ink-500">관련 법령·판례</p>
                 {f.citations.length === 0 ? (
-                  <p className="text-xs text-slate-400">현재 연결된 법률자료에서는 직접 확인되는 근거를 찾지 못했습니다.</p>
+                  <p className="text-xs text-ink-400">현재 연결된 법률자료에서는 직접 확인되는 근거를 찾지 못했습니다.</p>
                 ) : (
                   <ul className="flex flex-col gap-1">
                     {f.citations.map((c, i) => (
-                      <li key={i} className="rounded bg-slate-50 p-2 text-xs">
+                      <li key={i} className="rounded bg-ink-50 p-2 text-xs">
                         <strong>[{c.source_type}]</strong> {c.source_title} {c.verified ? "" : "(미검증)"}
-                        <p className="mt-1 text-slate-500">{c.excerpt}</p>
+                        <p className="mt-1 text-ink-500">{c.excerpt}</p>
                       </li>
                     ))}
                   </ul>
@@ -123,8 +123,8 @@ export function RiskTab({ documentId }: { documentId: string }) {
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="mb-2">
-      <p className="text-xs font-medium text-slate-500">{label}</p>
-      <p className="whitespace-pre-wrap text-slate-700">{value}</p>
+      <p className="text-xs font-medium text-ink-500">{label}</p>
+      <p className="whitespace-pre-wrap text-ink-700">{value}</p>
     </div>
   );
 }
@@ -134,7 +134,7 @@ function FilterChip({ label, active, onClick }: { label: string; active: boolean
     <button
       onClick={onClick}
       className={`rounded-full border px-3 py-1 text-xs ${
-        active ? "border-brand-600 bg-brand-600 text-white" : "border-slate-300 bg-white text-slate-600"
+        active ? "border-brand-600 bg-brand-600 text-white" : "border-ink-300 bg-white text-ink-600"
       }`}
     >
       {label}

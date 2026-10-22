@@ -15,9 +15,9 @@ export default function AdminManualPage() {
 
   if (!hasRole("SYSTEM_ADMIN")) {
     return (
-      <div className="rounded border border-slate-200 bg-white p-6">
-        <h1 className="mb-2 text-lg font-bold text-slate-900">관리자 매뉴얼</h1>
-        <p className="text-sm text-slate-600">
+      <div className="card p-6">
+        <h1 className="mb-2 text-lg font-bold text-ink-900">관리자 매뉴얼</h1>
+        <p className="text-sm text-ink-600">
           이 매뉴얼은 시스템관리자 전용입니다.{" "}
           <Link href="/manual" className="text-brand-700 underline">
             사용자 매뉴얼 보기
@@ -29,8 +29,8 @@ export default function AdminManualPage() {
 
   return (
     <div>
-      <h1 className="mb-1 text-2xl font-bold text-slate-900">관리자 매뉴얼</h1>
-      <p className="mb-6 text-sm text-slate-500">
+      <h1 className="mb-1 text-2xl font-bold text-ink-900">관리자 매뉴얼</h1>
+      <p className="mb-6 text-sm text-ink-500">
         관리자 전용 화면과 운영 업무를 다룹니다. 일반 기능은 사용자 매뉴얼을 참고하세요.
       </p>
       <ManualViewer markdown={adminManual} label="관리자 매뉴얼" />

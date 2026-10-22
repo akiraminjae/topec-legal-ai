@@ -29,14 +29,14 @@ export function RevisionsTab({ documentId }: { documentId: string }) {
     queryClient.invalidateQueries({ queryKey: ["revisions", documentId] });
   }
 
-  if (isLoading) return <p className="text-slate-400">불러오는 중...</p>;
+  if (isLoading) return <p className="text-ink-400">불러오는 중...</p>;
   if (revisions.length === 0)
-    return <div className="rounded border border-slate-200 bg-white p-6 text-center text-slate-400">생성된 수정안이 없습니다.</div>;
+    return <div className="card p-6 text-center text-ink-400">생성된 수정안이 없습니다.</div>;
 
   return (
     <div className="flex flex-col gap-3">
       {revisions.map((r) => (
-        <div key={r.id} className="rounded border border-slate-200 bg-white p-4">
+        <div key={r.id} className="card p-5">
           <div className="mb-2 flex items-center justify-between">
             <span className="rounded bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700">
               {REVISION_LEVEL_LABELS[r.level] || r.level}
@@ -44,7 +44,7 @@ export function RevisionsTab({ documentId }: { documentId: string }) {
             <div className="flex items-center gap-2">
               <span
                 className={`text-xs ${
-                  r.status === "ACCEPTED" ? "text-green-600" : r.status === "REJECTED" ? "text-slate-400" : "text-slate-500"
+                  r.status === "ACCEPTED" ? "text-emerald-600" : r.status === "REJECTED" ? "text-ink-400" : "text-ink-500"
                 }`}
               >
                 {r.status === "ACCEPTED" ? "채택됨" : r.status === "REJECTED" ? "거절됨" : "미결정"}
@@ -55,14 +55,14 @@ export function RevisionsTab({ documentId }: { documentId: string }) {
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div className="rounded bg-red-50 p-3 text-sm">
               <p className="mb-1 text-xs font-medium text-red-700">원문</p>
-              <p className="whitespace-pre-wrap text-slate-700">{dejustifyText(r.original_text) || "(원문 미확인)"}</p>
+              <p className="whitespace-pre-wrap text-ink-700">{dejustifyText(r.original_text) || "(원문 미확인)"}</p>
             </div>
-            <div className="rounded bg-green-50 p-3 text-sm">
-              <p className="mb-1 text-xs font-medium text-green-700">수정안</p>
-              <p className="whitespace-pre-wrap text-slate-700">{r.revised_text}</p>
+            <div className="rounded bg-emerald-50 p-3 text-sm">
+              <p className="mb-1 text-xs font-medium text-emerald-700">수정안</p>
+              <p className="whitespace-pre-wrap text-ink-700">{r.revised_text}</p>
             </div>
           </div>
-          <p className="mt-2 text-xs text-slate-500">수정 사유: {r.change_reason}</p>
+          <p className="mt-2 text-xs text-ink-500">수정 사유: {r.change_reason}</p>
           <div className="mt-3 flex gap-2">
             <button onClick={() => act(r.id, "accept")} className="btn-primary">
               채택
