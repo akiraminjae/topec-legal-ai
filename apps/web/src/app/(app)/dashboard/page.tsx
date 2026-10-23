@@ -109,26 +109,30 @@ export default function DashboardPage() {
               <EmptyState icon={PieIcon} title="분석 완료된 문서가 없습니다." compact />
             ) : (
               <div className="flex flex-col items-center gap-4 sm:flex-row">
-                <ResponsiveContainer width="100%" height={200} className="max-w-[240px]">
-                  <PieChart>
-                    <Pie
-                      data={riskChartData}
-                      dataKey="value"
-                      nameKey="name"
-                      innerRadius={54}
-                      outerRadius={84}
-                      paddingAngle={2}
-                      stroke="none"
-                    >
-                      {riskChartData.map((entry) => (
-                        <Cell key={entry.name} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip {...TOOLTIP_STYLE} formatter={(v: number) => [`${v}건`, "문서"]} />
-                  </PieChart>
-                </ResponsiveContainer>
+                {/* ResponsiveContainer 는 부모의 가로폭을 재므로, flex 행 안에서는
+                    폭이 0 으로 줄어든다. 고정폭 래퍼로 감싸 눌리지 않게 한다. */}
+                <div className="h-[200px] w-[200px] shrink-0">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={riskChartData}
+                        dataKey="value"
+                        nameKey="name"
+                        innerRadius={54}
+                        outerRadius={84}
+                        paddingAngle={2}
+                        stroke="none"
+                      >
+                        {riskChartData.map((entry) => (
+                          <Cell key={entry.name} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip {...TOOLTIP_STYLE} formatter={(v: number) => [`${v}건`, "문서"]} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
                 {/* recharts 기본 범례 대신 건수까지 함께 보여주는 목록을 쓴다 */}
-                <ul className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-[9rem]">
+                <ul className="flex w-full min-w-0 flex-1 flex-col gap-2">
                   {riskChartData.map((entry) => (
                     <li key={entry.name} className="flex items-center gap-2 text-sm">
                       <span className="h-2.5 w-2.5 shrink-0 rounded-sm" style={{ backgroundColor: entry.color }} />
